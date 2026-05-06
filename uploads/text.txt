@@ -1,0 +1,27 @@
+树莓派共有 4 个 USB 端口，1 个 Micro USB 端口。其中三个 USB 端口任意接 2 个网络摄像头及与 Arduino Mega 2560 相连的串口线。Micro USB端口接入外接电源（5V2A）。 Arduino Mega 2560 板的 PWM 输出口（2,3,4,5,6,7,10,12）分别对应接入驱动板电机驱动端口(A1,A2,B1,B2,C1,C2,D1,D2)。每一对驱动端口分别对应每个电机前转后转驱动。驱动板 VCC 电源引脚、EN 使能引脚、GND 引脚分别由 Arduino 板 5V、3.3V、GND引脚提供。
+4.树莓派与Arduino软件通信
+   树莓派与 Arduino 皆有 USB 接口。因此，Raspberry Pi 与 Arduino 之间进行信息传输
+采用串口通信。数据传输以字符串的形式存在。 在树莓派上编程时，需载入 Serial 函数库。即 import serial（python）。由树莓派向 Arduino 传输字符串时采用 ser.write()语句。
+    Arduino 作为接收端读取串口数据采用 Serial.available()判别串口写入的数据是否有效，Serial.read()负责串口数据读取。
+
+
+#Python端串口程序
+# 本实验目的：检查转化成字符的变量值能否通过串口通信传给arduino//success
+
+# 嵌入串口
+import serial
+ser = serial.Serial('/dev/ttyUSB0', 9600)
+
+t = 10
+output = t*10
+output = "fr"+str(output)
+x = output.encode('utf-8')
+#output1.decode('utf-8')
+ser.write(x)
+
+//Arduino端串口程序
+while(Serial.available())
+{
+    str=str+char(Serial.read());
+    delay(2);
+}

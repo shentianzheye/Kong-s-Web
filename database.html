@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/i18n.js?v=15"></script>
+<style>html:not(.i18n-ready) [data-i18n]{visibility:hidden}</style>
+<title>KONG · 知识库</title>
+<link rel="shortcut icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/style.css?v=14">
+<style>
+  .page-head { padding: calc(72px + 4rem) var(--edge) 2.5rem; max-width: 1440px; margin: 0 auto; border-bottom: 1px solid var(--rule); }
+  .page-head .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 1.2rem; }
+  .page-head h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.5rem, 5.5vw, 4.5rem); line-height: 1.1; letter-spacing: -0.02em; max-width: 22ch; }
+  .page-head h1 .cn { display: block; font-family: var(--mono); font-size: 0.22em; font-weight: 400; letter-spacing: 0.14em; color: var(--ink-3); text-transform: uppercase; margin-top: 1em; }
+  .page-head .lede { margin-top: 1.5rem; font-family: var(--sans); font-size: 14px; color: var(--ink-2); max-width: none; line-height: 1.7; }
+
+  .sec { max-width: 1440px; margin: 0 auto; padding: 3rem var(--edge) 1rem; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--rule); margin-bottom: 1.5rem; }
+  .sec-head h2 { font-family: var(--display); font-weight: 400; font-size: 1.8rem; letter-spacing: -0.01em; }
+  .sec-head .n { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+
+  /* Notion-style card grid */
+  .cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .card { display: flex; flex-direction: column; background: #1d1d1d; border: 1px solid #2a2a2a; border-radius: 6px; overflow: hidden; text-decoration: none; transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease; cursor: pointer; }
+  .card:hover { transform: translateY(-2px); border-color: #3a3a3a; box-shadow: 0 14px 30px -16px rgba(0,0,0,0.4); }
+  .card .thumb { aspect-ratio: 16 / 11; background: #2a2a2a center/cover no-repeat; position: relative; }
+  .card .thumb.video::after { content: "▶"; position: absolute; left: 12px; bottom: 12px; color: #fff; background: rgba(0,0,0,0.55); padding: 3px 10px; font-size: 10px; border-radius: 3px; letter-spacing: 0.06em; }
+  .card .label { padding: 10px 12px 12px; font-family: var(--sans); font-size: 12.5px; line-height: 1.4; color: #d8d6d3; display: flex; gap: 6px; align-items: flex-start; }
+  .card .label::before { content: "📄"; flex: none; filter: grayscale(0.4); font-size: 11px; }
+  .card .label.vid::before { content: "🎬"; }
+
+  @media (max-width: 1200px) { .cards { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 760px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+
+  /* Section "shelf" - dark band wrapping the grid like the screenshot */
+  .shelf { background: #131313; border-radius: 8px; padding: 22px; margin-top: 6px; }
+
+  /* ---------- Modal / Lightbox ---------- */
+  .modal-veil {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(12, 12, 14, 0.72);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    display: none; align-items: flex-start; justify-content: center;
+    padding: 4vh 4vw;
+    overflow-y: auto;
+    animation: fadein 220ms ease;
+  }
+  .modal-veil[data-open] { display: flex; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    width: 100%; max-width: 1100px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5);
+    overflow: hidden;
+    animation: rise 320ms cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes rise { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px; border-bottom: 1px solid var(--rule);
+    position: sticky; top: 0; background: var(--paper); z-index: 2;
+  }
+  .modal-head .meta { display: flex; flex-direction: column; gap: 4px; }
+  .modal-head .eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }
+  .modal-head h2 { font-family: var(--display); font-weight: 400; font-size: 1.5rem; letter-spacing: -0.01em; }
+  .modal-close {
+    background: none; border: 1px solid var(--rule); border-radius: 999px;
+    width: 36px; height: 36px; cursor: pointer; font-size: 18px; color: var(--ink-2);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 180ms ease, color 180ms ease;
+  }
+  .modal-close:hover { background: var(--ink); color: var(--paper); }
+
+  .modal-body { padding: 28px; display: flex; flex-direction: column; gap: 32px; }
+
+  .doc h3 {
+    font-family: var(--display); font-weight: 400; font-size: 1.15rem;
+    letter-spacing: -0.005em; color: var(--ink);
+    padding-bottom: 8px; border-bottom: 1px solid var(--rule); margin-bottom: 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .doc h3 .num { font-family: var(--mono); font-size: 0.7em; color: var(--ink-3); letter-spacing: 0.1em; }
+  .doc p { font-family: var(--sans); font-size: 14.5px; line-height: 1.75; color: var(--ink-2); margin-bottom: 12px; max-width: 78ch; }
+  .doc .fig { margin: 16px 0; }
+  .doc .fig img { width: 100%; height: auto; display: block; border: 1px solid var(--rule); border-radius: 4px; background: #fff; }
+  .doc .fig figcaption { margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .doc .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .doc .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 760px) { .doc .grid-2, .doc .grid-3 { grid-template-columns: 1fr; } }
+
+  .doc pre {
+    background: #1a1a1a; color: #d8d6d3;
+    padding: 14px 18px; border-radius: 4px;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    overflow-x: auto; margin: 8px 0 16px;
+  }
+  .doc pre .com { color: #6a8b6a; }
+  .doc pre .kw { color: #c98b6a; }
+  .doc pre .str { color: #b8a26a; }
+
+  .doc table.spec { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-family: var(--sans); font-size: 13.5px; }
+  .doc table.spec th, .doc table.spec td { padding: 8px 12px; border-bottom: 1px solid var(--rule); text-align: left; }
+  .doc table.spec th { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+
+  /* Collapsible source block */
+  .doc details.src { border: 1px solid var(--rule); border-radius: 4px; background: #1a1a1a; overflow: hidden; margin: 8px 0 16px; }
+  .doc details.src > summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #d8d6d3; background: #1f1f1f; transition: background 160ms ease; }
+  .doc details.src > summary::-webkit-details-marker { display: none; }
+  .doc details.src > summary:hover { background: #262626; }
+  .doc details.src > summary .meta-r { color: #8a8a8a; font-size: 10.5px; }
+  .doc details.src > summary .chev { display: inline-block; transition: transform 200ms ease; color: #8a8a8a; }
+  .doc details.src[open] > summary .chev { transform: rotate(90deg); }
+  .doc details.src pre { margin: 0; border-radius: 0; max-height: 60vh; overflow: auto; font-size: 12px; line-height: 1.55; }
+</style>
+</head>
+<body data-screen-label="04 Database">
+
+<header class="chrome">
+  <div class="chrome-inner">
+    <a class="wordmark" href="index.html"><span class="mark"></span><span class="name" data-i18n="wordmark.name">孔德世</span></a>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav.profile">主页</a>
+      <a href="research.html" data-i18n="nav.research">研究</a>
+      <a href="database.html" data-i18n="nav.database">知识库</a>
+      <a href="links.html" data-i18n="nav.links">链接</a>
+      <a href="life.html" data-i18n="nav.life">生活</a>
+    </nav>
+    <div class="meta">
+      <span><span class="dot"></span><span>知识库 · Knowledge base</span></span>
+      <span data-langswitch></span>
+    </div>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="eyebrow" data-i18n="db.eyebrow">知识库 · KNOWLEDGE BASE</div>
+  <h1>
+    <span data-i18n="db.h">学习与项目笔记。</span>
+    <span class="cn" data-i18n="db.cn">课程 · 项目 · 资料</span>
+  </h1>
+  <p class="lede" data-i18n="db.lede">这里整理了大学以来完成的项目与有趣的列车资料。</p>
+</section>
+
+<!-- 项目 / Projects -->
+<section class="sec">
+  <div class="sec-head">
+    <h2 data-i18n="db.proj.h">项目记录</h2>
+    <span class="n" data-i18n="db.proj.n">PROJECTS · 04</span>
+  </div>
+  <div class="shelf">
+    <div class="cards">
+      <a class="card" href="#" data-modal="agv">
+        <div class="thumb video" style="background-image: url('assets/agv/labeled.png');"></div>
+        <div class="label vid" data-i18n="db.card.agv">AGV 小车车道线识别与自动避障</div>
+      </a>
+      <a class="card" href="#" data-modal="wireless">
+        <div class="thumb video" style="background-image: url('assets/wireless/car-build.jpg'); background-position: center;"></div>
+        <div class="label vid" data-i18n="db.card.wireless">无线充电小车 · 2018 TI 杯</div>
+      </a>
+      <a class="card" href="#" data-modal="emag">
+        <div class="thumb" style="background-image: url('assets/emag/car-top.jpg'); background-position: center;"></div>
+        <div class="label" data-i18n="db.card.emag">电磁导航智能车</div>
+      </a>
+      <a class="card" href="#" data-modal="bomb">
+        <div class="thumb" style="background-image: url('assets/mcu/board.png'); background-position: center;"></div>
+        <div class="label" data-i18n="db.card.bomb">微机课设 · 自定时炸弹</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 轨道交通资料 / Rail -->
+<section class="sec">
+  <div class="sec-head">
+    <h2 data-i18n="db.rail.h">轨道交通资料</h2>
+    <span class="n" data-i18n="db.rail.n">RAIL · 02</span>
+  </div>
+  <div class="shelf">
+    <div class="cards">
+      <a class="card" href="#">
+        <div class="thumb" style="background-image: linear-gradient(135deg, #2a4a6a, #1a2e44);"></div>
+        <div class="label" data-i18n="db.card.rail1">佛山市高明区现代有轨电车示范线 — 氢能源有轨电车</div>
+      </a>
+      <a class="card" href="#">
+        <div class="thumb" style="background-image: linear-gradient(135deg, #4a2a2a, #2e1818);"></div>
+        <div class="label" data-i18n="db.card.rail2">D903 纵向双层卧 — CRH2E 型动车组</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AGV Modal ============ -->
+<div class="modal-veil" id="modal-agv" role="dialog" aria-modal="true" aria-labelledby="agv-title">
+  <article class="modal">
+    <header class="modal-head">
+      <div class="meta">
+        <span class="eyebrow" data-i18n="agv.eyebrow">PROJECT · 2015–2016</span>
+        <h2 id="agv-title" data-i18n="agv.title">AGV 小车 — 车道线识别与自动避障</h2>
+      </div>
+      <button class="modal-close" aria-label="关闭" data-i18n-attr="aria-label:db.close" data-close>×</button>
+    </header>
+    <div class="modal-body">
+
+      <figure class="fig" style="margin: 0;">
+        <img src="assets/agv/agv-field.jpg" alt="AGV" style="aspect-ratio: 16/9; object-fit: cover;">
+        <figcaption data-i18n="agv.cap.hero">户外石板路实地测试 · 循迹 + 避障联动运行</figcaption>
+      </figure>
+
+      <section class="doc">
+        <h3><span class="num">01</span><span data-i18n="agv.s1.h">项目概述</span></h3>
+        <p data-i18n="agv.s1.p">基于 Arduino Mega 2560 与 Raspberry Pi 双控制器架构的 AGV（自动导引）小车，配备双摄像头分别承担循迹与避障任务，使用麦克纳姆轮实现全向移动，通过增量式 PID 控制电机 PWM 完成车道线跟随与障碍物绕行。</p>
+        <table class="spec">
+          <tr><th data-i18n="agv.spec.mcu">主控</th><td data-i18n="agv.spec.mcu.v">Arduino Mega 2560 + Raspberry Pi（图像处理）</td></tr>
+          <tr><th data-i18n="agv.spec.drv">驱动</th><td data-i18n="agv.spec.drv.v">BTS7960 H 桥驱动板 × 4</td></tr>
+          <tr><th data-i18n="agv.spec.chassis">底盘</th><td data-i18n="agv.spec.chassis.v">四麦克纳姆轮全向底盘</td></tr>
+          <tr><th data-i18n="agv.spec.sense">感知</th><td data-i18n="agv.spec.sense.v">循迹摄像头 + 避障摄像头 + 超声波</td></tr>
+          <tr><th data-i18n="agv.spec.com">通信</th><td data-i18n="agv.spec.com.v">Pi ↔ Arduino 串口（USB / 9600 bps）</td></tr>
+        </table>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">02</span><span data-i18n="agv.s2.h">开发历程</span></h3>
+        <p data-i18n="agv.s2.p">从早期单层亚克力面包板原型机起步，逐步替换为麦克纳姆轮底盘并加装树莓派与双摄像头，最终形成可在户外石板路稳定循迹避障的整车。</p>
+
+        <div class="grid-3">
+          <figure class="fig"><img src="assets/agv/agv-1.jpg" alt="1"><figcaption data-i18n="agv.cap.1">1 · 原型机 · 2015 智能小车（面包板调试期）</figcaption></figure>
+          <figure class="fig"><img src="assets/agv/agv-2.jpg" alt="2"><figcaption data-i18n="agv.cap.2">2 · 台面调试 · 传感器联调</figcaption></figure>
+          <figure class="fig"><img src="assets/agv/agv-3.jpg" alt="3"><figcaption data-i18n="agv.cap.3">3 · 麦克纳姆轮底盘 · 装配中</figcaption></figure>
+        </div>
+
+        <div class="grid-2">
+          <figure class="fig"><img src="assets/agv/agv-5.jpg" alt="4"><figcaption data-i18n="agv.cap.4">4 · 底盘走线 · BTS7960 × 4 控制四电机</figcaption></figure>
+          <figure class="fig"><img src="assets/agv/agv-4.jpg" alt="5"><figcaption data-i18n="agv.cap.5">5 · 完整车体 · 双摄像头 + 超声波</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">03</span><span data-i18n="agv.s3.h">整车结构（图 6.4 小车实物图）</span></h3>
+        <figure class="fig">
+          <img src="assets/agv/labeled.png" alt="">
+          <figcaption data-i18n="agv.cap.labeled">图 6.4 · 小车实物图 — 避障摄像头 / 循迹摄像头 / 树莓派 / Arduino Mega 2560 / 驱动板 BTS7960</figcaption>
+        </figure>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">04</span><span data-i18n="agv.s4.h">总体设计方案（图 1.1）</span></h3>
+        <p data-i18n="agv.s4.p">图像采集 → 树莓派预处理 → 障碍物判别 → 增量式 PID → 串口通信 → Arduino 接收 → 改变电机 PWM 波 → 车身方向控制。检测到障碍物时切换至 Arduino 端避障逻辑。</p>
+        <figure class="fig" style="max-width: 520px;">
+          <img src="assets/agv/flowchart.png" alt="">
+          <figcaption data-i18n="agv.cap.flowchart">图 1.1 · 总体设计方案流程图</figcaption>
+        </figure>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">05</span><span data-i18n="agv.s5.h">硬件接线 · 树莓派 / Arduino / 驱动板</span></h3>
+        <p data-i18n="agv.s5.p1">树莓派共有 4 个 USB 端口、1 个 Micro USB 端口。其中三个 USB 端口任意接 2 个网络摄像头及与 Arduino Mega 2560 相连的串口线；Micro USB 端口接入外接电源（5V 2A）。</p>
+        <p data-i18n="agv.s5.p2">Arduino Mega 2560 的 PWM 输出口（2、3、4、5、6、7、10、12）分别接入驱动板电机驱动端口（A1、A2、B1、B2、C1、C2、D1、D2），每一对端口对应每个电机的前转 / 后转。驱动板 VCC、EN、GND 分别由 Arduino 的 5V、3.3V、GND 提供。</p>
+        <figure class="fig" style="max-width: 520px;">
+          <img src="assets/agv/wiring.png" alt="">
+          <figcaption data-i18n="agv.cap.wiring">图 · 树莓派 / Arduino / BTS7960 接线示意</figcaption>
+        </figure>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">06</span><span data-i18n="agv.s6.h">树莓派 ↔ Arduino 软件通信</span></h3>
+        <p data-i18n="agv.s6.p.html">两端均通过 USB 实现串口通信，数据以字符串形式传输。树莓派端使用 Python <code>serial</code> 库，调用 <code>ser.write()</code> 发送；Arduino 端通过 <code>Serial.available()</code> 判别有效数据，并以 <code>Serial.read()</code> 逐字节读取。</p>
+
+        <div class="grid-2">
+          <div>
+            <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">Python · 树莓派端</p>
+<pre><span class="com"># 检查转化成字符的变量值能否通过串口通信传给 arduino</span>
+<span class="kw">import</span> serial
+ser = serial.Serial(<span class="str">'/dev/ttyUSB0'</span>, 9600)
+
+t = 10
+output = t * 10
+output = <span class="str">"fr"</span> + str(output)
+x = output.encode(<span class="str">'utf-8'</span>)
+ser.write(x)</pre>
+          </div>
+          <div>
+            <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">Arduino · 接收端</p>
+<pre><span class="kw">while</span>(Serial.available())
+{
+    str = str + char(Serial.read());
+    delay(2);
+}</pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </article>
+</div>
+
+<!-- ============ Wireless Charging Car Modal ============ -->
+<div class="modal-veil" id="modal-wireless" role="dialog" aria-modal="true" aria-labelledby="wireless-title">
+  <article class="modal">
+    <header class="modal-head">
+      <div class="meta">
+        <span class="eyebrow" data-i18n="wl.eyebrow">PROJECT · 2018 · TIIC 上海赛区</span>
+        <h2 id="wireless-title" data-i18n="wl.title">无线充电小车 — 超级电容供能 · 断电自启动</h2>
+      </div>
+      <button class="modal-close" aria-label="关闭" data-i18n-attr="aria-label:db.close" data-close>×</button>
+    </header>
+    <div class="modal-body">
+
+      <figure class="fig" style="margin: 0;">
+        <video controls preload="metadata" poster="assets/wireless/car-build.jpg" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #000; display: block;">
+          <source src="assets/wireless/wireless-demo.mp4" type="video/mp4">
+        </video>
+        <figcaption data-i18n="wl.cap.video">实测视频 · 无线充电 → 超级电容储能 → 断电自启动 → 持续行驶</figcaption>
+      </figure>
+
+      <section class="doc">
+        <h3><span class="num">01</span><span data-i18n="wl.s1.h">项目概述</span></h3>
+        <p data-i18n="wl.s1.p">2018 年上海市大学生电子设计竞赛（TI 杯）参赛作品。整车以超级电容代替电池，通过无线方式从外接 5V/1A 直流稳压电源取电；当无线供电断开时，继电器触发自启动逻辑，DC-DC 升降压电路维持 3.3V 输出，驱动小车继续行驶直至电容耗尽。</p>
+        <table class="spec">
+          <tr><th data-i18n="wl.spec.p">供电</th><td data-i18n="wl.spec.p.v">直流稳压电源 5V / 1A</td></tr>
+          <tr><th data-i18n="wl.spec.s">储能</th><td data-i18n="wl.spec.s.v">超级电容 10 F</td></tr>
+          <tr><th data-i18n="wl.spec.w">无线充电</th><td data-i18n="wl.spec.w.v">TI BQ51013B · 充电效率约 70%</td></tr>
+          <tr><th data-i18n="wl.spec.r">断电自启动</th><td data-i18n="wl.spec.r.v">继电器 TQ2-5V ATQ209</td></tr>
+          <tr><th data-i18n="wl.spec.v">稳压输出</th><td data-i18n="wl.spec.v.v">TI TPS63020 升降压 → 定压 3.3V</td></tr>
+          <tr><th data-i18n="wl.spec.c">底盘</th><td data-i18n="wl.spec.c.v">田宫旋风冲锋四驱车（Cyclone Magnum）改装</td></tr>
+        </table>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">02</span><span data-i18n="wl.s2.h">系统组成</span></h3>
+        <p data-i18n="wl.s2.p">能量链路：外部 5V 电源 → 无线发射线圈 → 接收线圈 → BQ51013B 整流稳压 → 10 F 超级电容储能 → TPS63020 升降压 → 3.3V 总线 → 驱动电机。控制链路：TQ2-5V 继电器实时检测无线供电状态，断电瞬间切换至电容供电并触发车辆启动信号。</p>
+        <div class="grid-2">
+          <div>
+            <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">能量链路 · Power Path</p>
+<pre>5V/1A DC ─► TX coil ┄┄ RX coil ─► <span class="kw">BQ51013B</span>
+                                  │
+                                  ▼
+                            10 F Super-Cap
+                                  │
+                                  ▼
+                            <span class="kw">TPS63020</span> ─► 3.3V ─► Motor</pre>
+          </div>
+          <div>
+            <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">控制链路 · Auto-Restart</p>
+<pre><span class="com">// 无线供电中断瞬间</span>
+<span class="kw">if</span> (Vwireless &lt; threshold) {
+    relay.<span class="kw">switch</span>(SUPERCAP);
+    <span class="com">// 触发自启动 · 继续行驶</span>
+    motor.start();
+}</pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">03</span><span data-i18n="wl.s3.h">整车实拍</span></h3>
+        <figure class="fig">
+          <img src="assets/wireless/car-build.jpg" alt="">
+          <figcaption data-i18n="wl.cap.car">整车实物 · 田宫四驱车底盘 + 自制控制板（无线接收 / BQ51013B / TPS63020 / 继电器）</figcaption>
+        </figure>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">04</span><span data-i18n="wl.s4.h">开发与参赛过程</span></h3>
+        <div class="grid-3">
+          <figure class="fig"><img src="assets/wireless/kit-box.jpg" alt="1"><figcaption data-i18n="wl.cap.1">1 · 起点 · 旋风冲锋四驱车套件，作为底盘原型</figcaption></figure>
+          <figure class="fig"><img src="assets/wireless/contest-site.jpg" alt="2"><figcaption data-i18n="wl.cap.2">2 · 参赛现场 · 2018 TIIC 上海赛区（华东师范大学）</figcaption></figure>
+          <figure class="fig"><img src="assets/wireless/meal-ticket.jpg" alt="3"><figcaption data-i18n="wl.cap.3">3 · 参赛凭证 · 2018.07.27–29 · 华东师大夏雨厅</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">05</span><span data-i18n="wl.s5.h">关键指标</span></h3>
+        <table class="spec">
+          <tr><th data-i18n="wl.k.eff">无线充电效率</th><td data-i18n="wl.k.eff.v">≈ 70%（实测）</td></tr>
+          <tr><th data-i18n="wl.k.full">电容充满电压</th><td data-i18n="wl.k.full.v">满足 TPS63020 输入范围（1.8–5.5V）</td></tr>
+          <tr><th data-i18n="wl.k.resp">断电响应</th><td data-i18n="wl.k.resp.v">继电器毫秒级切换 · 无人为干预自启动</td></tr>
+          <tr><th data-i18n="wl.k.out">稳压输出</th><td data-i18n="wl.k.out.v">3.3V ± 容差，满足驱动电路要求</td></tr>
+        </table>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">06</span><span data-i18n="wl.s6.h">设计报告</span></h3>
+        <p data-i18n="wl.s6.p">完整设计报告（PDF · 含原理图、电路分析、调试记录）：</p>
+        <a href="assets/wireless/report.pdf" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 14px; padding: 16px 20px; border: 1px solid var(--rule); border-radius: 4px; text-decoration: none; color: var(--ink-1); font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; transition: background 0.15s, border-color 0.15s;" onmouseover="this.style.background='#f7f5f1';this.style.borderColor='var(--ink-2)'" onmouseout="this.style.background='';this.style.borderColor='var(--rule)'">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 44px; border: 1px solid currentColor; font-size: 9px; font-weight: 700; letter-spacing: 0.08em;">PDF</span>
+          <span style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="text-transform: uppercase; font-weight: 600;" data-i18n="wl.pdf.t">无线充电小车 · 设计报告</span>
+            <span style="color: var(--ink-3); font-size: 10px; text-transform: none; letter-spacing: 0.04em;" data-i18n="wl.pdf.s">点击在新窗口打开 / 右键另存为</span>
+          </span>
+        </a>
+      </section>
+
+    </div>
+  </article>
+</div>
+
+<!-- ============ Electromagnetic Smart Car Modal ============ -->
+<div class="modal-veil" id="modal-emag" role="dialog" aria-modal="true" aria-labelledby="emag-title">
+  <article class="modal">
+    <header class="modal-head">
+      <div class="meta">
+        <span class="eyebrow" data-i18n="em.eyebrow">PROJECT · 2018 · 校内赛</span>
+        <h2 id="emag-title" data-i18n="em.title">电磁导航智能车 — 双电感差分循迹</h2>
+      </div>
+      <button class="modal-close" aria-label="关闭" data-i18n-attr="aria-label:db.close" data-close>×</button>
+    </header>
+    <div class="modal-body">
+
+      <figure class="fig" style="margin: 0;">
+        <img src="assets/emag/lineup.jpg" alt="" style="aspect-ratio: 16/9; object-fit: cover;">
+        <figcaption data-i18n="em.cap.hero">校内赛备战 · 一字排开的电磁组参赛车（蓝色赛道 / 白色引导线）</figcaption>
+      </figure>
+
+      <section class="doc">
+        <h3><span class="num">01</span><span data-i18n="em.s1.h">项目概述</span></h3>
+        <p data-i18n="em.s1.p">全国大学生智能汽车竞赛 · 电磁组（校内赛）。赛道中央铺设 20 kHz / 100 mA 通电导线，车头横杆两端的工字电感采集交变磁场，经放大检波后通过差分算法解算车体相对赛道中心线的偏差，由 PID 控制器闭环调节舵机转向与电机 PWM，实现高速循迹。</p>
+        <table class="spec">
+          <tr><th data-i18n="em.spec.mcu">主控</th><td data-i18n="em.spec.mcu.v">NXP MCU（智能车竞赛标配）</td></tr>
+          <tr><th data-i18n="em.spec.det">检测原理</th><td data-i18n="em.spec.det.v">双电感差分 · 工字电感 + 运放放大 + 检波</td></tr>
+          <tr><th data-i18n="em.spec.sig">赛道信号</th><td data-i18n="em.spec.sig.v">20 kHz · 100 mA 交变电流（赛规标准）</td></tr>
+          <tr><th data-i18n="em.spec.alg">控制算法</th><td data-i18n="em.spec.alg.v">位置式 / 增量式 PID（转向 + 速度）</td></tr>
+          <tr><th data-i18n="em.spec.ele">赛道元素</th><td data-i18n="em.spec.ele.v">十字路口判断 · 起跑线检测</td></tr>
+          <tr><th data-i18n="em.spec.cha">底盘 / 供电</th><td data-i18n="em.spec.cha.v">B 车模 · 7.2V Ni-Cd 电池组</td></tr>
+        </table>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">02</span><span data-i18n="em.s2.h">感应板与差分原理</span></h3>
+        <p data-i18n="em.s2.p">两枚 10 mH 工字电感对称布置在车头横杆两端，采集到的交变电压经选频放大、二极管检波后转为直流电平送入 MCU 的 ADC。当车体偏离中心线时，靠近导线一侧的电感感应电压上升、远离一侧下降；用 (L−R)/(L+R) 做归一化差分即可消除整体磁场强度波动的影响，得到与偏差量近似线性的控制信号。</p>
+        <figure class="fig">
+          <img src="assets/emag/sensor-board.jpg" alt="">
+          <figcaption data-i18n="em.cap.sensor">电磁感应板特写 · 红色 PCB 上对称的运放放大电路 + 横杆两端工字电感</figcaption>
+        </figure>
+        <div class="grid-2">
+          <div>
+            <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">差分归一化 · Error Calculation</p>
+<pre><span class="com">// 双电感差分 · 消除幅度漂移</span>
+<span class="kw">float</span> L = adc_read(LEFT);
+<span class="kw">float</span> R = adc_read(RIGHT);
+<span class="kw">float</span> err = (L - R) / (L + R);
+<span class="com">// err ∈ [-1, +1]，0 即车身居中</span></pre>
+          </div>
+          <div>
+            <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">位置式 PID · Steering Loop</p>
+<pre><span class="kw">float</span> pid_steer(<span class="kw">float</span> err) {
+    integral += err;
+    <span class="kw">float</span> d = err - last_err;
+    last_err = err;
+    <span class="kw">return</span> Kp*err + Ki*integral + Kd*d;
+}</pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">03</span><span data-i18n="em.s3.h">整车结构</span></h3>
+        <figure class="fig">
+          <img src="assets/emag/car-top.jpg" alt="">
+          <figcaption data-i18n="em.cap.top">整车俯视 · 横杆电感 + 红色运放感应板 + NXP 主控板 + 7.2V Ni-Cd 电池组</figcaption>
+        </figure>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">04</span><span data-i18n="em.s4.h">赛道元素识别</span></h3>
+        <p data-i18n="em.s4.p.html"><strong>十字路口</strong>：当左右电感电压同时跌至阈值以下持续若干采样周期，判定进入十字交叉，此时锁定上一帧的舵机角度直至越过路口，避免误转向。<strong>起跑线</strong>：起跑线处布置有特殊频率/形状的磁场标识，通过对采样信号的特征模式匹配识别，触发圈数计数与冲线减速。</p>
+      </section>
+
+    </div>
+  </article>
+</div>
+
+<!-- ============ MCU Bomb Modal ============ -->
+<div class="modal-veil" id="modal-bomb" role="dialog" aria-modal="true" aria-labelledby="bomb-title">
+  <article class="modal">
+    <header class="modal-head">
+      <div class="meta">
+        <span class="eyebrow" data-i18n="bm.eyebrow">COURSEWORK · 微机原理课程设计</span>
+        <h2 id="bomb-title" data-i18n="bm.title">自定时炸弹 — 8086 + 8255/8253/8259/8279</h2>
+      </div>
+      <button class="modal-close" aria-label="关闭" data-i18n-attr="aria-label:db.close" data-close>×</button>
+    </header>
+    <div class="modal-body">
+
+      <figure class="fig" style="margin: 0;">
+        <img src="assets/mcu/board.png" alt="" style="aspect-ratio: 16/10; object-fit: cover;">
+        <figcaption data-i18n="bm.cap.hero">星研 8086 实验箱 · 8255 / 8253 / 8259 / 8279 全部用上的"接线工艺品"</figcaption>
+      </figure>
+
+      <section class="doc">
+        <h3><span class="num">01</span><span data-i18n="bm.s1.h">项目概述</span></h3>
+        <p data-i18n="bm.s1.p">用 8086 汇编实现一枚带按键解除的"自定时炸弹"。开机后用 8279 键盘选定炸药量（决定倒计时长度与最终爆炸效果），数码管同步显示剩余秒数，倒数过程中可随时通过 8259 中断输入解除密码；超时未解除则点亮 8255 控制的 LED 阵列模拟爆炸。整套程序全部在数据手册级别用 IN/OUT 直接编程驱动，没有库函数。</p>
+        <table class="spec">
+          <tr><th data-i18n="bm.spec.mcu">主控</th><td data-i18n="bm.spec.mcu.v">8086 · 实模式汇编（MASM）</td></tr>
+          <tr><th data-i18n="bm.spec.io">I/O 扩展</th><td data-i18n="bm.spec.io.v">8255 并行口（流水灯 + PC0 秒脉冲）</td></tr>
+          <tr><th data-i18n="bm.spec.tim">定时</th><td data-i18n="bm.spec.tim.v">8253 双计数器级联 · 模式 2 + 模式 0 → 1 Hz</td></tr>
+          <tr><th data-i18n="bm.spec.int">中断</th><td data-i18n="bm.spec.int.v">8259 单片 · IR0 上升沿触发解除中断</td></tr>
+          <tr><th data-i18n="bm.spec.kb">键盘 / 显示</th><td data-i18n="bm.spec.kb.v">8279 编程键盘控制器 · 8 位共阳数码管 + 16 键</td></tr>
+          <tr><th data-i18n="bm.spec.cd">倒计时档位</th><td data-i18n="bm.spec.cd.v">5 s / 10 s / 15 s 三档（按 0/1/2 键选择）</td></tr>
+        </table>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">02</span><span data-i18n="bm.s2.h">功能与流程</span></h3>
+        <p data-i18n="bm.s2.p">原始设计来自一张随手画的功能图——倒计时、炸药量自选、最低 30 秒不可解除、最后 10 秒促音、爆炸时 LED 显示爆炸程度、按键输入解除密码。代码版本简化为三档倒计时 + 中断解除 + 三种爆炸花样。</p>
+        <figure class="fig">
+          <img src="assets/mcu/flowchart.jpg" alt="">
+          <figcaption data-i18n="bm.cap.flow">设计阶段的手绘流程图 · 触发→键盘输入→倒计时→密码判断→显示正确 / BOOM</figcaption>
+        </figure>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">03</span><span data-i18n="bm.s3.h">主控状态机</span></h3>
+        <p data-i18n="bm.s3.p.html">主程序启动时初始化 8279，循环扫描键盘等待档位输入；输入合法后跳入对应的 <code>CD0/CD1/CD2</code> 倒计时过程。每秒由 8253 + 8255 PC0 协作产生秒脉冲，<code>TEST_C3</code> 检测到上升沿后递减 BCD 计数器并刷新数码管；倒计时期间 <code>SCAN_PW</code> 打开 8259 中断，IR0 触发的 <code>INT_0</code> 读取 8255 PB 端口比对解除密码（这里取 <code>80H</code> 为正确密码），匹配则跳回 START 复位，否则进入 <code>BOOM</code> 直接引爆。</p>
+        <div class="grid-2">
+          <div>
+            <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">8279 键盘扫描 · Polling Loop</p>
+<pre><span class="com">; 主循环：等待两位档位键</span>
+START1: CALL SCAN_KEY
+        JNC  START1
+        XCHG AL,KEYCOUNT
+        INC  AL
+        CMP  AL,2
+        JNZ  START2
+        JMP  START1
+START2: XCHG AL,KEYCOUNT
+        CALL KEY_NUM
+        CALL MOXUAN     <span class="com">; 跳模式</span></pre>
+          </div>
+          <div>
+            <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px;">8253 秒级定时 · 1 ms × 1000</p>
+<pre><span class="com">; T0: 模式 2，1 ms 方波</span>
+MOV DX,COM_ADDR
+MOV AL,35H
+OUT DX,AL
+<span class="com">; T1: 模式 0，1000 计数 → 1 s</span>
+MOV AL,71H
+OUT DX,AL
+<span class="com">; PC0 由 OUT1 拉高 → 主循环轮询</span></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">04</span><span data-i18n="bm.s4.h">中断解除与爆炸效果</span></h3>
+        <p data-i18n="bm.s4.p.html">解除中断由 <code>WriIntver</code> 把 <code>INT_0</code> 入口写到向量表 8H（IRQ0 在实模式下对应中断号 8）；中断响应里 <strong>没有调用 IRET</strong>——而是直接 <code>JMP START</code> 复位整机，或 <code>JMP BOOM</code> 强制引爆并清掉调用栈里残留的 5 层 PUSH，避免回到倒计时循环。倒计时正常归零则走 <code>ECD → LIGHT</code> 路径，按选定档位查 <code>LED_Data</code> 表点亮 8255 PA 的 LED 序列（11111B / 00111B / 00000B 模拟由小到大三档爆炸），延时 3 秒后熄灭、HLT。</p>
+        <table class="spec">
+          <tr><th data-i18n="bm.k.ok">正确密码</th><td data-i18n="bm.k.ok.v.html">从 8255 PB 读到 <code>80H</code>（10000000B）</td></tr>
+          <tr><th data-i18n="bm.k.bad">错误密码</th><td data-i18n="bm.k.bad.v">任意非 80H · 立即跳 BOOM</td></tr>
+          <tr><th data-i18n="bm.k.zero">归零路径</th><td data-i18n="bm.k.zero.v">Counter == 0 · 走 LIGHT 流程播放预设花样</td></tr>
+          <tr><th data-i18n="bm.k.three">三档花样</th><td data-i18n="bm.k.three.v">PA = 1FH / 07H / 00H · LED 数量逐档增加</td></tr>
+        </table>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">05</span><span data-i18n="bm.s5.h">完整源码</span></h3>
+        <p style="max-width: none;" data-i18n="bm.s5.p.html">下面是当年交课设时的全部 MASM 源码，原样保留（包括手写中文注释和密集的星号分隔行），点击展开可以滚动查看，或<a href="assets/mcu/bomb.asm" download style="color: var(--ink); text-decoration: underline;">下载 .asm 文件</a>。</p>
+        <details class="src">
+          <summary>
+            <span><span class="chev">▸</span>&nbsp;&nbsp;bomb.asm · 8086 MASM · ~400 行</span>
+            <span class="meta-r">Click to expand</span>
+          </summary>
+<pre><span class="com">.MODEL     TINY
+EXTRN         Display8:NEAR
+;;;;;;;8279;;;;;;</span>
+CMD_8279 EQU 0BF01H
+DATA_8279 EQU 0BF00H
+<span class="com">;;;;;;;8255;;;;;;</span>
+COM_ADD EQU 0F003H
+PA_ADD EQU 0F000H
+PB_ADD EQU 0F001H
+PC_ADD EQU 0F002H
+<span class="com">;;;;;;;;;;;;8259;;;;;;;;;;;;;;;</span>
+I08259_0      EQU        0E000H
+I08259_1      EQU        0E001H
+<span class="com">;;;;;;;;;;;;;;8253;;;;;;;;;;;;;;;;;</span>
+COM_ADDR EQU 0A003H
+T0_ADDR	EQU 0A000H
+T1_ADDR	EQU 0A001H
+
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;DATA;;;;;;;;;;;;;;;;;;;;;;;;</span>
+.STACK     100
+.DATA
+<span class="com">;;;;;;;;;;;;;;;;;;8255流水灯;;;;;;;;;;;;;;;;;;;;;</span>
+LED_Data DB 00011111B<span class="com">;模式0</span>
+   	 DB 00000111B<span class="com">;模式1</span>
+	 DB 00000000B<span class="com">;模式2</span>
+<span class="com">;;;;;;;;;;;;;;;;;;8279按键数码管;;;;;;;;;;;;;;;;;;;;;;</span>
+KEYCOUNT DB ?
+LED_TAB	DB 0C0H,0F9H,0A4H,0B0H,99H,92H,82H,0F8H
+	DB 080H,90H,88H,83H,0C6H,0A2H,86H,8EH
+
+BUFFER        DB         8 DUP(?)
+Counter       DB         ?
+ReDisplayFlag DB         0
+
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;CODE;;;;;;;;;;;;;;;;;;;;;;;</span>
+              .CODE
+<span class="com">;;;;;;;;;;;;;;;;;;;主程序;;;;;;;;;;;;;;;;;;;</span>
+START:	MOV AX,@DATA
+	MOV DS,AX
+	NOP
+	<span class="com">;;;;;;;8279;;;;;;;;;;</span>
+	CALL INIT8279
+START1:	CALL SCAN_KEY
+	JNC START1
+	XCHG AL,KEYCOUNT
+	INC AL
+	CMP AL,2
+	JNZ START2
+	JMP START1
+START2:	XCHG AL,KEYCOUNT
+	CALL KEY_NUM
+	CALL MOXUAN
+<span class="com">;;;;;;;;;;;;;;;;;;;8279初始化;;;;;;;;;;;;;;;;</span>
+INIT8279 PROC NEAR
+	MOV DX,CMD_8279
+	MOV AL,34H
+	OUT DX,AL
+	MOV AL,0
+	OUT DX,AL
+	MOV AL,0
+	OUT DX,AL
+	MOV AL,0A0H
+	OUT DX,AL
+	CALL INIT8279_1
+	RET
+INIT8279	ENDP
+
+INIT8279_1	PROC NEAR
+	CALL CLEAR
+	MOV AL,90H
+	OUT DX,AL
+	RET
+INIT8279_1 ENDP
+CLEAR	PROC NEAR
+	MOV DX,CMD_8279
+	MOV AL,0DEH
+	OUT DX,AL
+WAIT1:	IN AL,DX
+	TEST AL,80H
+	JNZ WAIT1
+	RET
+CLEAR	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;扫描有无按键输入;;;;;;;;;;;;;;;</span>
+SCAN_KEY PROC NEAR
+	MOV DX,CMD_8279
+	IN AL,DX
+READ_F1F0: AND AL,7
+	JZ NO_KEY
+READ: 	MOV AL,40H
+	OUT DX,AL
+	MOV DX,DATA_8279
+	IN AL,DX
+	STC
+SCAN_KEY1: RET
+NO_KEY:	CLC
+	JMP SCAN_KEY1
+SCAN_KEY ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;按键数字数码管显示;;;;;;;;;;;;;;;;;</span>
+WRITE_DATA	PROC NEAR
+	MOV DX,DATA_8279
+	OUT DX,AL
+	RET
+WRITE_DATA	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;按键数字化;;;;;;;;;;;;;;;;;;;;;</span>
+KEY_NUM	PROC NEAR
+	AND AL,3FH
+	RET
+KEY_NUM	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;模式选择;;;;;;;;;;;;;;;;;;;;;</span>
+MOXUAN	PROC NEAR
+	CMP AL,0
+	JZ P0
+	CMP AL,1
+	JZ P1
+	CMP AL,2
+	JZ P2
+	JMP START1
+P0:	PUSH AX<span class="com">;模式0</span>
+	LEA BX,LED_TAB
+	XLAT
+	CALL WRITE_DATA
+	CALL CD0	
+P1:	PUSH AX<span class="com">;模式1</span>
+	LEA BX,LED_TAB
+	XLAT
+	CALL WRITE_DATA
+	CALL CD1	
+P2:	PUSH AX<span class="com">;模式2</span>
+	LEA BX,LED_TAB
+	XLAT
+	CALL WRITE_DATA
+	CALL CD2
+MOXUAN	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;8255初始化;;;;;;;;;;;;;;</span>
+A8255	PROC NEAR
+	MOV DX,COM_ADD<span class="com">;端口全输出</span>
+	MOV AL,80H
+	OUT DX,AL
+	MOV DX,PA_ADD<span class="com">;控制灯全灭</span>
+	MOV AL,0FFH
+	OUT DX,AL
+	LEA BX,LED_Data<span class="com">;给表地址</span>
+	RET
+A8255	ENDP		
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;倒计时;;;;;;;;;;;;;;;;;;;;;;</span>
+<span class="com">;;;;;;;;;;5秒;;;;;;;;;;;;;;;;;</span>
+CD0	PROC NEAR
+	NOP
+	MOV        Counter,5
+	MOV        ReDisplayFlag,1
+	CALL       LedDisplay
+	MOV CX,5
+LOOP0:	CALL SECOND
+	CALL TEST_C3
+CD0_1:	CMP        ReDisplayFlag,0
+	JZ         CD0_1
+	CALL       LedDisplay	  
+	MOV        ReDisplayFlag,0
+	DEC CX
+	CALL SCAN_PW
+	CALL ECD
+	JNZ	LOOP0
+CD0	ENDP
+<span class="com">;;;;;;;;;;;;;10秒;;;;;;;;;;;;;;;;;;;</span>
+CD1	PROC NEAR
+	NOP
+	MOV        Counter,16<span class="com">;BCD 10秒</span>
+	MOV        ReDisplayFlag,1
+	CALL       LedDisplay
+	MOV CX,10
+LOOP1:	CALL SECOND
+	CALL TEST_C3
+CD1_1:	CMP        ReDisplayFlag,0
+	JZ         CD1_1
+	CALL       LedDisplay	  
+	MOV        ReDisplayFlag,0
+	DEC CX
+	CALL SCAN_PW
+	CALL ECD
+	JNZ	LOOP1
+CD1	ENDP
+<span class="com">;;;;;;;;;;;;;;;;15秒;;;;;;;;;;;;;;;;;;;;</span>
+CD2	PROC NEAR
+	NOP
+	MOV        Counter,21<span class="com">;BCD 15秒</span>
+	MOV        ReDisplayFlag,1
+	CALL       LedDisplay
+	MOV CX,15
+LOOP2:	CALL SECOND
+	CALL TEST_C3
+CD2_1:	CMP 	   ReDisplayFlag,0
+	JZ	   CD2_1
+	CALL       LedDisplay
+	MOV        ReDisplayFlag,0
+	DEC	CX
+	CALL SCAN_PW
+	CALL ECD
+	JNZ	LOOP2	
+CD2	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;数码管显示;;;;;;;;;;;;;;;;;;;;;;;;;</span>
+LedDisplay    PROC       NEAR
+              MOV        AL,Counter
+	      MOV        AH,AL
+	      AND        AL,0FH
+	      MOV        Buffer,AL
+	      AND        AH,0F0H
+	      ROR        AH,4
+	      MOV        Buffer + 1,AH
+	      MOV        Buffer + 2,10H
+	      MOV        Buffer + 3,10H
+	      MOV        Buffer + 4,10H
+	      MOV        Buffer + 5,10H
+	      MOV        Buffer + 6,10H
+	      MOV        Buffer + 7,10H
+	      LEA        SI,Buffer
+	      CALL       Display8
+	      RET
+LedDisplay    ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;8253一秒定时计数器;;;;;;;;;;;;;;;;;;;</span>
+SECOND	PROC NEAR	
+	MOV DX,COM_ADDR<span class="com">;T0 模式2 BCD</span>
+	MOV AL,35H
+	OUT DX,AL
+	MOV DX,T0_ADDR
+	MOV AL,00H
+	OUT DX,AL
+	MOV AL,10H
+	OUT DX,AL<span class="com">;0.001s</span>
+	MOV DX,COM_ADDR<span class="com">;T1 模式0 BCD</span>
+	MOV AL,71H
+	OUT DX,AL
+	MOV DX,T1_ADDR
+	MOV AL,00H
+	OUT DX,AL
+	MOV AL,10H
+	OUT DX,AL<span class="com">;1秒</span>
+	RET
+SECOND	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;8255 PC0 检查是否经过一秒;;;;;;;;;;;;;;;;;;;;;</span>
+TEST_C3	PROC NEAR
+	MOV DX,COM_ADD
+	MOV AL,93H
+	OUT DX,AL
+TEST_C31:	MOV DX,PC_ADD
+		IN AL,DX
+		CMP AL,01H<span class="com">;低电平进入</span>
+		JNZ TEST_C31 
+TEST_C32:	MOV DX,PC_ADD
+		IN AL,DX
+		CMP AL,01H<span class="com">;高电平进入</span>
+		JNZ TEST_C32  
+	MOV ReDisplayFlag,1
+	MOV AL,Counter
+	SUB AL,1
+	DAS
+	MOV Counter,AL
+	RET
+TEST_C3	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;检查有无中断密码输入;;;;;;;;;;;;;;;;;;;;;;;;;</span>
+SCAN_PW	PROC NEAR
+	CALL Init8259
+	CALL WriIntver
+	STI
+	RET
+SCAN_PW	ENDP
+<span class="com">;;;;;;;;;;;;;;;检查倒数是否结束;;;;;;;;;;;;;;;;</span>
+ECD	PROC NEAR
+	MOV AL,COUNTER
+	CMP AL,00000000B
+	JZ DOWN
+	RET
+DOWN:	CALL LedDisplay
+	POP CX
+	POP CX
+	JMP LIGHT
+ECD	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;爆炸小灯;;;;;;;;;;;;;;;;;;;;;;;</span>
+LIGHT   PROC NEAR
+	CALL A8255
+	POP AX
+	XLAT
+	OUT DX,AL
+	CALL DL3S
+	MOV DX,PA_ADD
+	MOV AL,0FFH
+	OUT DX,AL
+	HLT
+LIGHT	ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;延时3秒;;;;;;;;;;;;;;;;;;;</span>
+DL3S PROC NEAR
+	PUSH CX
+	MOV CX,6
+DL3S1:CALL DL500ms
+	LOOP DL3S1
+	POP CX
+	RET
+DL3S ENDP
+DL500ms PROC NEAR
+	PUSH CX
+	MOV CX,60000
+DL500ms1:LOOP DL500ms1
+	POP CX
+	RET
+DL500ms ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;8259初始化;;;;;;;;;;;;;;;;;;;;</span>
+Init8259      PROC       NEAR
+              MOV        DX,I08259_0
+	      MOV        AL,13H
+	      OUT        DX,AL
+	      MOV        DX,I08259_1
+	      MOV        AL,08H
+	      OUT        DX,AL
+	      MOV        AL,09H
+	      OUT        DX,AL
+	      MOV        AL,0FEH
+	      OUT        DX,AL
+	      RET
+Init8259      ENDP
+<span class="com">;;;;;;;;;;;;;;中断向量表写入;;;;;;;;;;;;;</span>
+WriIntver     PROC       NEAR
+              PUSH       ES
+	      MOV        AX,0
+	      MOV        ES,AX
+	      MOV        DI,20H
+	      LEA        AX,INT_0
+	      STOSW
+	      MOV        AX,CS
+	      STOSW
+	      POP        ES
+	      RET
+WriIntver     ENDP
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;中断子程序;;;;;;;;;;;;;;;;;;;;</span>
+INT_0: 	MOV DX,PB_ADD
+	IN AL,DX
+	CMP AL,80H
+	JZ ORI
+	JMP BOOM
+ORI:	JMP START
+<span class="com">;;;;;;;;;;;;;;;;;;;;;;;;;;;;直爆程序;;;;;;;;;;;;;;;;;;;;;</span>
+BOOM	PROC NEAR
+	CALL A8255
+	POP CX
+	POP CX
+	POP CX
+	POP CX
+	POP CX<span class="com">;清堆栈</span>
+	POP AX
+	XLAT
+	OUT DX,AL
+	CALL DL3S
+	MOV DX,PA_ADD
+	MOV AL,0FFH
+	OUT DX,AL
+	HLT
+BOOM	ENDP
+	END        START</pre>
+        </details>
+      </section>
+
+      <section class="doc">
+        <h3><span class="num">06</span><span data-i18n="bm.s6.h">踩过的坑</span></h3>
+        <p data-i18n="bm.s6.p.html"><strong>① 中断里清栈。</strong>因为中断可能从倒计时子程序的深层 CALL 处发生，直接 <code>JMP BOOM</code> 会让 SP 错位；最终在 BOOM 入口连 POP 五次把现场全部丢弃，再读 8255 PA 输出爆炸图样。<strong>② 8253 模式选择。</strong>T0 用模式 2（速率发生器）保证 1 ms 节拍稳定，T1 用模式 0（计数终止）做 1000 次计数后翻转 OUT1，这两档不能互换。<strong>③ BCD 减一。</strong>用 <code>SUB AL,1 / DAS</code> 让数码管显示 09 → 08 而不是 09 → 0F。</p>
+      </section>
+
+    </div>
+  </article>
+</div>
+
+<footer style="max-width: 1440px; margin: 4rem auto 0; padding: 2rem var(--edge); border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3);">
+  <span>© <span id="yr"></span> Deshi Kong</span>
+  <span data-i18n="db.footer.note">慢慢补充中</span>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // Modal open/close
+  document.querySelectorAll('[data-modal]').forEach(card => {
+    card.addEventListener('click', e => {
+      e.preventDefault();
+      const id = card.getAttribute('data-modal');
+      const veil = document.getElementById('modal-' + id);
+      if (veil) {
+        veil.setAttribute('data-open', '');
+        document.body.style.overflow = 'hidden';
+      }
+    });
+  });
+  document.querySelectorAll('.modal-veil').forEach(veil => {
+    const close = () => {
+      veil.removeAttribute('data-open');
+      document.body.style.overflow = '';
+    };
+    veil.addEventListener('click', e => { if (e.target === veil) close(); });
+    veil.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-veil[data-open]').forEach(v => {
+        v.removeAttribute('data-open');
+        document.body.style.overflow = '';
+      });
+    }
+  });
+</script>
+<script src="assets/app.js?v=15"></script>
+</body>
+</html>

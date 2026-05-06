@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/i18n.js?v=15"></script>
+<style>html:not(.i18n-ready) [data-i18n]{visibility:hidden}</style>
+<title>KONG · 链接</title>
+<link rel="shortcut icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/style.css?v=12">
+<style>
+  .lk-head { padding: calc(72px + 4rem) var(--edge) 3rem; max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: 1.3fr 1fr; gap: 4rem; align-items: end; border-bottom: 1px solid var(--rule); }
+  .lk-head h1 { font-family: var(--display); font-weight: 400; font-size: clamp(3rem, 7vw, 5.5rem); line-height: 1.05; letter-spacing: -0.025em; white-space: pre-line; }
+  .lk-head .cn { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-top: 1.5rem; }
+  .lk-head .aside { font-family: var(--sans); font-size: 15px; line-height: 1.7; color: var(--ink-2); max-width: 42ch; padding-bottom: 0.5rem; }
+  .lk-cols { max-width: 1440px; margin: 0 auto; padding: 4rem var(--edge); display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; border-bottom: 1px solid var(--rule); }
+  .lk-col h2 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--rule); }
+  .lk-row { display: grid; grid-template-columns: 2.25rem 1fr auto; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--rule-2); align-items: center; transition: padding 200ms; }
+  .lk-row:hover { padding-left: 0.75rem; background: var(--paper-2); }
+  .lk-row .n { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.1em; }
+  .lk-row .t { font-family: var(--display); font-size: 20px; font-weight: 400; color: var(--ink); }
+  .lk-row .h { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-top: 3px; letter-spacing: 0.03em; }
+  .lk-row .arrow { font-family: var(--display); font-size: 20px; color: var(--accent-ink); transition: transform 200ms; }
+  .lk-row:hover .arrow { transform: translateX(8px); }
+  .lk-contact { max-width: 1440px; margin: 0 auto; padding: 6rem var(--edge); display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; border-bottom: 1px solid var(--rule); align-items: start; }
+  .lk-contact .lbl { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 2rem; }
+  .lk-contact h2 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; letter-spacing: -0.015em; }
+  .lk-contact dl { display: grid; gap: 2rem; }
+  .lk-contact dl dt { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+  .lk-contact dl dd { font-family: var(--display); font-size: 22px; font-weight: 400; color: var(--ink); line-height: 1.3; }
+  .lk-contact dl .s { font-family: var(--sans); font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+  .lk-contact .mail { font-family: var(--mono); font-size: 18px; color: var(--accent-ink); border-bottom: 1px solid var(--accent); padding-bottom: 3px; display: inline-block; }
+  .lk-locations { max-width: 1440px; margin: 0 auto; padding: 5rem var(--edge); border-bottom: 1px solid var(--rule); }
+  .lk-locations .eyebrow { margin-bottom: 2rem; }
+  .lk-locations .strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--rule); }
+  .lk-locations .stop { padding: 2rem 0 2rem 0; border-right: 1px solid var(--rule); padding-right: 2rem; }
+  .lk-locations .stop:last-child { border-right: none; padding-left: 2rem; padding-right: 0; }
+  .lk-locations .stop:nth-child(2) { padding-left: 2rem; }
+  .lk-locations .yr { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 8px; }
+  .lk-locations .city { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.02em; }
+  .lk-col-colophon { max-width: 1440px; margin: 0 auto; padding: 5rem var(--edge); display: grid; grid-template-columns: 1fr 1.8fr; gap: 4rem; }
+  .lk-col-colophon .eyebrow { margin-bottom: 1.5rem; }
+  .lk-col-colophon h2 { font-family: var(--display); font-weight: 400; font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.15; letter-spacing: -0.015em; }
+  .lk-col-colophon p { font-size: 15px; line-height: 1.75; color: var(--ink-2); margin-bottom: 1.25rem; max-width: 60ch; }
+  @media (max-width: 960px) {
+    .lk-head, .lk-cols, .lk-contact, .lk-col-colophon { grid-template-columns: 1fr; gap: 2rem; }
+    .lk-locations .strip { grid-template-columns: 1fr; }
+    .lk-locations .stop, .lk-locations .stop:last-child, .lk-locations .stop:nth-child(2) { border-right: none; border-bottom: 1px solid var(--rule); padding: 1.25rem 0; }
+  }
+</style>
+</head>
+<body data-screen-label="05 Links">
+
+<header class="chrome">
+  <div class="chrome-inner">
+    <a class="wordmark" href="index.html"><span class="mark"></span><span class="name" data-i18n="wordmark.name">孔德世</span></a>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav.profile">主页</a>
+      <a href="research.html" data-i18n="nav.research">研究</a>
+      <a href="database.html" data-i18n="nav.database">知识库</a>
+      <a href="links.html" data-i18n="nav.links">链接</a>
+      <a href="life.html" data-i18n="nav.life">生活</a>
+    </nav>
+    <div class="meta">
+      <span><span class="dot"></span><span data-i18n="meta.openwork">欢迎合作</span></span>
+      <span data-langswitch></span>
+    </div>
+  </div>
+</header>
+
+<section class="lk-head">
+  <div>
+    <div class="eyebrow" data-i18n="lk.head.eyebrow">链接与联系</div>
+    <h1 data-i18n="lk.head.h">在这些地方<br>可以找到我。</h1>
+    <div class="cn" data-i18n="lk.head.cn">联系方式与常驻平台</div>
+  </div>
+  <div class="aside" data-i18n="lk.head.aside">学术平台在前，其他在后。如果是关于轨道交通、储能或讲座的事，请先发邮件。</div>
+</section>
+
+<section class="lk-cols">
+  <div class="lk-col">
+    <h2 data-i18n="lk.col.ac">学术</h2>
+    <a class="lk-row" href="https://www.researchgate.net/profile/Deshi-Kong-2" target="_blank">
+      <span class="n">01</span>
+      <div><div class="t" data-i18n="lk.rg.t">ResearchGate — 主要平台</div><div class="h">researchgate.net / profile / Deshi-Kong-2</div></div>
+      <span class="arrow">↗</span>
+    </a>
+    <a class="lk-row" href="https://miyatake.main.jp/member.php" target="_blank">
+      <span class="n">02</span>
+      <div><div class="t" data-i18n="lk.sophia.t">上智大学 — 宫武研究室</div><div class="h">miyatake.main.jp / member</div></div>
+      <span class="arrow">↗</span>
+    </a>
+    <a class="lk-row" href="https://orcid.org/0000-0002-4671-5920" target="_blank">
+      <span class="n">03</span>
+      <div><div class="t" data-i18n="lk.orcid.t">ORCID — 研究者标识</div><div class="h">orcid.org / 0000-0002-4671-5920</div></div>
+      <span class="arrow">↗</span>
+    </a>
+  </div>
+  <div class="lk-col">
+    <h2 data-i18n="lk.col.other">联系</h2>
+    <a class="lk-row" href="mailto:d-kong-9a6@sophia.ac.jp">
+      <span class="n">04</span>
+      <div><div class="t" data-i18n="lk.email.t">邮件 · 首选</div><div class="h">d-kong-9a6[at]sophia.ac.jp</div></div>
+      <span class="arrow">↗</span>
+    </a>
+  </div>
+</section>
+
+<section class="lk-contact">
+  <div>
+    <div class="lbl" data-i18n="lk.contact.label">直接联系</div>
+    <h2 data-i18n="lk.contact.h">聊聊能源与轨道的事。</h2>
+  </div>
+  <dl>
+    <div>
+      <dt data-i18n="lk.contact.email">邮箱</dt>
+      <dd><a class="mail" href="mailto:d-kong-9a6@sophia.ac.jp">d-kong-9a6[at]sophia.ac.jp</a></dd>
+    </div>
+    <div>
+      <dt data-i18n="lk.contact.mail">邮寄地址</dt>
+      <dd><span data-i18n="lk.contact.mail.v">上智大学</span><div class="s" data-i18n="lk.contact.mail.s">东京都千代田区纪尾井町 7-1 · 〒102-8554</div></dd>
+    </div>
+    <div>
+      <dt data-i18n="lk.contact.tz">时区</dt>
+      <dd><span data-i18n="lk.contact.tz.v">JST (GMT+9)</span><div class="s" data-i18n="lk.contact.tz.s">通常 2—3 个工作日内回复</div></dd>
+    </div>
+  </dl>
+</section>
+
+<section class="lk-col-colophon">
+  <div>
+    <div class="eyebrow" data-i18n="lk.colophon.eyebrow">版本说明</div>
+    <h2 data-i18n="lk.colophon.h">一个小小的网站。</h2>
+  </div>
+  <div>
+    <p data-i18n="lk.colophon.p1">显示字体采用 Fraunces，正文采用 Inter，元数据使用 JetBrains Mono。</p>
+    <p data-i18n="lk.colophon.p2">首页视频来自《崩坏：星穹铁道》——我很喜欢的一款游戏。<br>照片为本人拍摄。</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <span data-i18n="foot.copy">© 2026 孔德世</span>
+  <span class="center" data-i18n="foot.center">KONG's HOME · v2.0</span>
+  <a class="right" href="index.html" data-i18n="foot.right.back">← 返回首页</a>
+</footer>
+
+<script src="assets/app.js?v=15"></script>
+</body>
+</html>

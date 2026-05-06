@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/i18n.js?v=15"></script>
+<style>html:not(.i18n-ready) [data-i18n]{visibility:hidden}</style>
+<title>KONG · 生活</title>
+<link rel="shortcut icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/style.css?v=12">
+<style>
+  .page-head { padding: calc(72px + 4rem) var(--edge) 3rem; max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: end; border-bottom: 1px solid var(--rule); }
+  .page-head h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.75rem, 6vw, 5rem); line-height: 1.1; letter-spacing: -0.02em; }
+  .page-head h1 .cn { display: block; font-family: var(--mono); font-size: 0.2em; font-weight: 400; letter-spacing: 0.14em; color: var(--ink-3); text-transform: uppercase; margin-top: 1em; }
+  .page-head .aside { font-family: var(--mono); font-size: 12px; color: var(--ink-2); line-height: 1.7; max-width: 38ch; padding-bottom: 1rem; }
+  .page-head .aside .count { font-family: var(--display); font-weight: 400; font-size: 70px; line-height: 1; color: var(--accent-ink); display: block; margin-bottom: 6px; }
+  .bar { max-width: 1440px; margin: 0 auto; padding: 1.25rem var(--edge); display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid var(--rule); font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+  .bar .modes { display: flex; gap: 4px; }
+  .bar button { background: none; border: 1px solid var(--rule); padding: 7px 12px; font: inherit; color: var(--ink-2); cursor: pointer; letter-spacing: inherit; text-transform: inherit; }
+  .bar button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .gallery { max-width: 1440px; margin: 0 auto; padding: 2rem var(--edge) 4rem; column-count: 3; column-gap: 16px; }
+  .g-item { break-inside: avoid; margin-bottom: 16px; position: relative; cursor: pointer; overflow: hidden; background: var(--paper-3); }
+  .g-item img { width: 100%; display: block; transition: transform 400ms ease; }
+  .g-item:hover img { transform: scale(1.03); }
+  .g-item .cap { position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem 1rem 0.8rem; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); display: flex; justify-content: space-between; color: white; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; opacity: 0; transition: opacity 240ms; }
+  .g-item:hover .cap { opacity: 1; }
+  .gallery.mode-grid { column-count: unset; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .gallery.mode-grid .g-item { margin: 0; aspect-ratio: 1; }
+  .gallery.mode-grid .g-item img { width: 100%; height: 100%; object-fit: cover; }
+  .lb { position: fixed; inset: 0; z-index: 400; background: rgba(14,12,10,0.92); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 4rem; }
+  .lb.open { display: flex; }
+  .lb figure { position: relative; max-width: min(1100px, 92vw); max-height: 88vh; }
+  .lb img { max-width: 100%; max-height: calc(88vh - 60px); object-fit: contain; background: var(--paper-3); }
+  .lb figcaption { padding: 16px 0 0; font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 0.08em; display: flex; justify-content: space-between; }
+  .lb .x { position: absolute; top: -2.5rem; right: 0; background: none; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; font-family: var(--mono); font-size: 11px; cursor: pointer; }
+  .lb .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: 1px solid rgba(255,255,255,0.3); color: white; width: 44px; height: 44px; cursor: pointer; font-size: 18px; border-radius: 50%; }
+  .lb .prev { left: -4rem; } .lb .next { right: -4rem; }
+  @media (max-width: 960px) { .page-head { grid-template-columns: 1fr; } .gallery { column-count: 2; } .gallery.mode-grid { grid-template-columns: repeat(2, 1fr); } .lb { padding: 2rem; } .lb .prev { left: 0.5rem; } .lb .next { right: 0.5rem; } }
+
+  /* Password gate */
+  .gate { position: fixed; inset: 0; z-index: 500; background: var(--paper); display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .gate-card { max-width: 520px; width: 100%; text-align: center; }
+  .gate .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 1.5rem; }
+  .gate h2 { font-family: var(--display); font-weight: 400; font-size: clamp(2.25rem, 4.5vw, 3.5rem); line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 2.5rem; }
+  .gate .pin { display: flex; gap: 12px; justify-content: center; margin-bottom: 1.5rem; }
+  .gate .pin input { width: 64px; height: 80px; border: 1px solid var(--rule); border-bottom: 1px solid var(--ink-2); background: var(--paper); font-family: var(--display); font-weight: 400; font-size: 36px; text-align: center; color: var(--ink); outline: none; transition: border-color 160ms, background 160ms; }
+  .gate .pin input:focus { border-color: var(--accent-ink); background: var(--paper-2); }
+  .gate .pin.shake input { border-color: #b94a3a; }
+  .gate .pin.shake { animation: shake 320ms; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  .gate .hint { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--ink-3); }
+  .gate .hint .err { color: #b94a3a; }
+  .gate .back { display: inline-block; margin-top: 2.5rem; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule); padding-bottom: 2px; }
+  body.gate-locked { overflow: hidden; }
+  body.gate-locked .chrome, body.gate-locked main, body.gate-locked .page-head, body.gate-locked .bar, body.gate-locked .foot { visibility: hidden; }
+</style>
+</head>
+<body data-screen-label="02 Life" class="gate-locked">
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <h2 data-i18n="life.gate.h">需要密码。</h2>
+    <form class="pin" id="pin-form" autocomplete="off">
+      <input type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" required>
+      <input type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" required>
+      <input type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" required>
+      <input type="password" inputmode="numeric" maxlength="1" pattern="[0-9]" required>
+    </form>
+    <div class="hint"><span id="gate-hint" data-i18n="life.gate.hint">输入 4 位数字</span></div>
+    <a class="back" href="index.html" data-i18n="life.gate.back">← 返回主页</a>
+  </div>
+</div>
+
+<header class="chrome">
+  <div class="chrome-inner">
+    <a class="wordmark" href="index.html"><span class="mark"></span><span class="name" data-i18n="wordmark.name">孔德世</span></a>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav.profile">主页</a>
+      <a href="research.html" data-i18n="nav.research">研究</a>
+      <a href="database.html" data-i18n="nav.database">知识库</a>
+      <a href="links.html" data-i18n="nav.links">链接</a>
+      <a href="life.html" data-i18n="nav.life">生活</a>
+    </nav>
+    <div class="meta">
+      <span><span class="dot"></span><span data-i18n="meta.archive">图档 · 2019—2026</span></span>
+      <span data-langswitch></span>
+    </div>
+  </div>
+</header>
+
+<section class="page-head">
+  <div>
+    <div class="eyebrow" data-i18n="life.head.eyebrow">生活记录</div>
+    <h1>
+      <span data-i18n="life.head.h">一段时间里的影像。</span>
+    </h1>
+  </div>
+  <div class="aside">
+    <span class="count" data-i18n="life.head.aside.n">13</span>
+    <span data-i18n="life.head.aside">张照片——多半是顺手拍的。</span>
+  </div>
+</section>
+
+<div class="bar">
+  <span data-i18n="life.bar.count">13 张图片</span>
+  <div class="modes">
+    <button class="on" data-mode="masonry" data-i18n="life.mode.masonry">瀑布流</button>
+    <button data-mode="grid" data-i18n="life.mode.grid">网格</button>
+  </div>
+</div>
+
+<main class="gallery" id="gallery"></main>
+
+<div class="lb" id="lightbox">
+  <button class="nav-btn prev">←</button>
+  <figure>
+    <button class="x" data-i18n="life.lb.close">关闭 · Esc</button>
+    <img id="lb-img">
+    <figcaption><span id="lb-index">01 / 13</span></figcaption>
+  </figure>
+  <button class="nav-btn next">→</button>
+</div>
+
+<footer class="foot">
+  <span data-i18n="foot.copy">© 2026 孔德世</span>
+  <span class="center" data-i18n="foot.archive">个人图档 · 禁止转载</span>
+  <a class="right" href="index.html" data-i18n="foot.right.back">← 返回首页</a>
+</footer>
+
+<script src="assets/app.js?v=15"></script>
+<script>
+  // Password gate
+  (function() {
+    const PASS = '0000';
+    const KEY = 'life-unlocked';
+    const gate = document.getElementById('gate');
+    const inputs = document.querySelectorAll('#pin-form input');
+    const form = document.getElementById('pin-form');
+    const hint = document.getElementById('gate-hint');
+    function unlock() {
+      sessionStorage.setItem(KEY, '1');
+      document.body.classList.remove('gate-locked');
+      gate.style.display = 'none';
+    }
+    if (sessionStorage.getItem(KEY) === '1') { unlock(); return; }
+    setTimeout(() => inputs[0].focus(), 100);
+    inputs.forEach((inp, i) => {
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/[^0-9]/g, '');
+        if (inp.value && i < inputs.length - 1) inputs[i+1].focus();
+        const code = [...inputs].map(x => x.value).join('');
+        if (code.length === 4) {
+          if (code === PASS) { unlock(); }
+          else {
+            form.classList.add('shake');
+            const k = window.Kong_i18n;
+            const msg = (k && k.t('life.gate.err', k.getLang())) || '密码不正确';
+            hint.innerHTML = `<span class="err">${msg}</span>`;
+            setTimeout(() => { form.classList.remove('shake'); inputs.forEach(x => x.value = ''); inputs[0].focus(); }, 400);
+          }
+        }
+      });
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i-1].focus();
+      });
+    });
+    form.addEventListener('submit', e => e.preventDefault());
+  })();
+</script>
+<script>
+  const gallery = document.getElementById('gallery');
+  const items = [];
+  for (let i = 1; i <= 13; i++) {
+    const a = document.createElement('div');
+    a.className = 'g-item';
+    a.dataset.idx = i - 1;
+    a.innerHTML = `<img src="assets/gallery/${i}.jpg" loading="lazy"><figcaption class="cap"><span>${String(i).padStart(2,'0')}</span><span>—</span></figcaption>`;
+    gallery.appendChild(a); items.push(a);
+  }
+  document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-mode]').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    gallery.classList.toggle('mode-grid', b.dataset.mode === 'grid');
+  }));
+  const lb = document.getElementById('lightbox'), lbImg = document.getElementById('lb-img'), lbIdx = document.getElementById('lb-index');
+  let cur = 0;
+  function openLB(i) { cur = i; lbImg.src = `assets/gallery/${i+1}.jpg`; lbIdx.textContent = `${String(i+1).padStart(2,'0')} / 13`; lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeLB() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function step(d) { openLB((cur + d + 13) % 13); }
+  items.forEach(el => el.addEventListener('click', () => openLB(+el.dataset.idx)));
+  lb.querySelector('.x').addEventListener('click', closeLB);
+  lb.querySelector('.prev').addEventListener('click', () => step(-1));
+  lb.querySelector('.next').addEventListener('click', () => step(+1));
+  lb.addEventListener('click', e => { if (e.target === lb) closeLB(); });
+  document.addEventListener('keydown', e => { if (!lb.classList.contains('open')) return; if (e.key === 'Escape') closeLB(); if (e.key === 'ArrowLeft') step(-1); if (e.key === 'ArrowRight') step(+1); });
+</script>
+</body>
+</html>

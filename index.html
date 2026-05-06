@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/i18n.js?v=15"></script>
+<style>html:not(.i18n-ready) [data-i18n]{visibility:hidden}</style>
+<title>KONG's Home</title>
+<link rel="shortcut icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/style.css?v=12">
+<style>
+  /* Chrome — liquid glass over dark splash video */
+  body.at-splash .chrome { background: color-mix(in oklch, #000 35%, transparent); border-color: rgba(255,255,255,0.18); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.3), 0 8px 32px -8px rgba(0,0,0,0.5); }
+  body.at-splash .chrome::before { background: radial-gradient(120% 80% at 50% -20%, rgba(255,255,255,0.22), transparent 60%), linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0) 40%); }
+  body.at-splash .chrome .wordmark .name { color: #fff; font-weight: 600; }
+  body.at-splash .chrome .wordmark .sub { color: rgba(255,255,255,0.7); }
+  body.at-splash .chrome .meta { color: rgba(255,255,255,0.85); }
+  body.at-splash .chrome .wordmark .mark { background: #fff; }
+  body.at-splash .chrome .meta .dot { background: oklch(0.78 0.14 35); }
+  /* Scrolled past splash: chrome stays light/glass — handled by base styles */
+
+  /* Splash hero — full viewport video */
+  .splash { position: relative; height: 100vh; height: 100svh; min-height: 100vh; width: 100vw; margin-left: calc(50% - 50vw); overflow: hidden; background: #0a0a0a; display: block; }
+  .splash video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .splash .veil { position: absolute; inset: 0; background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.75) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 25%, transparent 60%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none; }
+  .splash .center { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 var(--edge); color: #f5f1ea; }
+  .splash .center .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; color: rgba(245,241,234,0.65); margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(245,241,234,0.25); }
+  .splash .center h1 { font-family: var(--display); font-weight: 300; font-size: clamp(2.75rem, 7vw, 6rem); line-height: 1.1; letter-spacing: -0.02em; max-width: 18ch; margin-bottom: 1.5rem; text-wrap: balance; }
+  .splash .center h1 em { font-style: italic; color: oklch(0.78 0.10 35); font-weight: 300; }
+  .splash .center .tagline { font-family: var(--display); font-style: italic; font-weight: 300; font-size: clamp(1.1rem, 1.8vw, 1.5rem); color: rgba(245,241,234,0.85); max-width: 36ch; line-height: 1.4; }
+  .splash .center .tagline.one-line { max-width: none; white-space: nowrap; font-size: clamp(0.95rem, 1.4vw, 1.25rem); }5; }
+  .splash .center .tagline + .tagline { margin-top: 0.4rem; }
+  .splash .frame-label { position: absolute; top: 1.5rem; left: 1.5rem; color: #f5f1ea; font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; padding: 6px 12px; border: 1px solid rgba(245,241,234,0.4); }
+  .splash .meta-tr { position: absolute; top: 1.5rem; right: 1.5rem; color: rgba(245,241,234,0.7); font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; text-align: right; line-height: 1.6; }
+  .splash .caption { position: absolute; bottom: 1.5rem; left: 1.5rem; color: rgba(245,241,234,0.7); font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+  .splash .scroll-cue { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); color: rgba(245,241,234,0.75); font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .splash .scroll-cue .line { width: 1px; height: 36px; background: rgba(245,241,234,0.5); animation: splashLine 2.2s ease-in-out infinite; transform-origin: top; }
+  @keyframes splashLine { 0%, 100% { transform: scaleY(0.3); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+  .splash .center { animation: splashRise 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  @keyframes splashRise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Old hero kept for the second section, recompacted */
+  .hero { padding: 5rem var(--edge) 0; max-width: 1440px; margin: 0 auto; position: relative; }
+  .hero-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: end; min-height: calc(100vh - 120px); padding-bottom: 5rem; }
+  .hero-copy .kicker { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 2rem; display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+  .hero-copy .kicker .tag { padding: 4px 10px; background: var(--accent-soft); color: var(--accent-ink); border-radius: 999px; letter-spacing: 0.1em; }
+  .hero h1 { font-family: var(--display); font-weight: 400; font-size: clamp(3rem, 8vw, 6.5rem); line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 1rem; }
+  .hero h1 .sub { display: block; font-family: var(--sans); font-size: 0.3em; font-weight: 400; letter-spacing: 0.01em; color: var(--ink-2); margin-top: 0.7em; line-height: 1.35; max-width: 20ch; }
+  .hero-copy p.lede { max-width: 38ch; font-size: 16px; color: var(--ink-2); line-height: 1.65; margin-top: 1.5rem; }
+  .hero-meta { display: grid; grid-template-columns: repeat(3, auto); gap: 2rem 2.5rem; margin-top: 3rem; font-family: var(--mono); font-size: 12px; }
+  .hero-meta dt { color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; font-size: 10px; margin-bottom: 6px; }
+  .hero-meta dd { color: var(--ink); font-size: 13px; }
+  .hero-video { position: relative; aspect-ratio: 4/5; overflow: hidden; background: var(--paper-3); }
+  .hero-video video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero-video .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.5), transparent 50%); pointer-events: none; }
+  .hero-video .caption { position: absolute; bottom: 18px; left: 18px; right: 18px; color: white; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; display: flex; justify-content: space-between; opacity: 0.9; }
+  .hero-video .frame-label { position: absolute; top: 18px; left: 18px; color: white; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.35); }
+  .scroll-hint { position: absolute; bottom: 2rem; left: var(--edge); font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); display: flex; align-items: center; gap: 10px; }
+  .scroll-hint .line { width: 40px; height: 1px; background: currentColor; transform-origin: left; animation: slide 2s ease-in-out infinite; }
+  @keyframes slide { 0%,100% { transform: scaleX(0.3); } 50% { transform: scaleX(1); } }
+  .marquee { padding: 2.5rem 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); overflow: hidden; white-space: nowrap; font-family: var(--display); font-weight: 400; font-size: clamp(1.75rem, 4vw, 2.75rem); color: var(--ink); }
+  .marquee .track { display: inline-block; animation: marq 40s linear infinite; padding-left: 100%; }
+  .marquee .sep { color: var(--accent); margin: 0 1.5rem; }
+  @keyframes marq { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+  .about p { font-size: 16px; line-height: 1.75; color: var(--ink-2); max-width: 62ch; margin-bottom: 1.25rem; }
+  .about .jp { font-family: var(--display); color: var(--ink-3); font-size: 15px; margin-top: 2rem; padding-left: 1.25rem; border-left: 2px solid var(--accent); max-width: 48ch; }
+  .about-langs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 3.5rem; border-top: 1px solid var(--rule); }
+  .about-langs > div { padding: 1.5rem 1.25rem 1.5rem 0; border-right: 1px solid var(--rule); }
+  .about-langs > div:last-child { border-right: none; }
+  .about-langs .lg { font-family: var(--display); font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 6px; display: flex; align-items: baseline; gap: 10px; }
+  .about-langs .lv { font-family: var(--mono); font-size: 15px; color: var(--accent-ink); font-weight: 500; }
+  .about-langs .sub { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+  .principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 3rem; }
+  .principle { background: var(--paper); padding: 2.5rem 2rem; display: flex; flex-direction: column; gap: 1.25rem; position: relative; min-height: 240px; }
+  .principle .idx { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--ink-3); }
+  .principle h3 { font-family: var(--display); font-weight: 500; font-size: 26px; line-height: 1.15; }
+  .principle .en-sub { font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.05em; margin-top: -0.5rem; }
+  .principle p { color: var(--ink-2); font-size: 14px; line-height: 1.6; margin-top: auto; }
+  .lab-block { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; padding-top: 3rem; }
+  .lab-block .side { position: sticky; top: 110px; }
+  .lab-block h2 { font-family: var(--display); font-weight: 400; font-size: clamp(1.75rem, 3.5vw, 2.5rem); line-height: 1.15; margin-bottom: 1rem; }
+  .lab-block .side p { color: var(--ink-2); font-size: 15px; max-width: 40ch; margin-bottom: 1rem; }
+  .lab-link { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); padding-bottom: 4px; border-bottom: 1px solid var(--ink); margin-top: 1rem; }
+  .lab-link:hover { color: var(--accent-ink); border-color: var(--accent); }
+  .colleagues { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .colleague { aspect-ratio: 3/4; overflow: hidden; position: relative; background: var(--paper-3); }
+  .colleague img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.3); transition: filter 300ms, transform 400ms; }
+  .colleague:hover img { filter: grayscale(0); transform: scale(1.04); }
+  .colleague .tag { position: absolute; bottom: 8px; left: 8px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: white; background: rgba(0,0,0,0.55); padding: 3px 7px; }
+  .cta { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; padding: clamp(4rem, 7vw, 6rem) 0; border-top: 1px solid var(--rule); margin-top: 5rem; }
+  .cta h2 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; }
+  .cta .links { display: grid; gap: 1px; background: var(--rule); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .cta .link { display: grid; grid-template-columns: auto 1fr auto; gap: 1.5rem; align-items: center; padding: 1.25rem 0.25rem; background: var(--paper); transition: padding 200ms, background 200ms; }
+  .cta .link:hover { padding-left: 1.25rem; background: var(--paper-2); }
+  .cta .link .idx { font-family: var(--mono); font-size: 10px; color: var(--ink-3); letter-spacing: 0.12em; }
+  .cta .link .name { font-family: var(--display); font-size: 20px; }
+  .cta .link .arrow { font-family: var(--display); font-size: 18px; color: var(--accent-ink); transition: transform 200ms; }
+  .cta .link:hover .arrow { transform: translateX(6px); }
+  @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; min-height: auto; } .hero-video { aspect-ratio: 4/3; } .hero-meta { grid-template-columns: 1fr 1fr; } .principles, .lab-block, .cta { grid-template-columns: 1fr; } .lab-block .side { position: static; } .colleagues { grid-template-columns: repeat(3, 1fr); } .about-langs { grid-template-columns: 1fr 1fr; } .about-langs > div:nth-child(2) { border-right: none; } }
+</style>
+</head>
+<body data-screen-label="01 Profile" class="at-splash">
+
+<header class="chrome">
+  <div class="chrome-inner">
+    <a class="wordmark" href="index.html">
+      <span class="mark"></span>
+      <span class="name" data-i18n="wordmark.name">孔德世</span>
+    </a>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav.profile">主页</a>
+      <a href="research.html" data-i18n="nav.research">研究</a>
+      <a href="database.html" data-i18n="nav.database">知识库</a>
+      <a href="links.html" data-i18n="nav.links">链接</a>
+      <a href="life.html" data-i18n="nav.life">生活</a>
+    </nav>
+    <div class="meta">
+      <span><span class="dot"></span><span data-i18n="meta.inresidence">居住于 · 东京</span></span>
+      <span data-langswitch></span>
+    </div>
+  </div>
+</header>
+
+<section class="splash" data-screen-label="00 Splash">
+  <video src="assets/hero.mp4" autoplay muted loop playsinline></video>
+  <div class="veil"></div>
+  <div class="center">
+    <div class="eyebrow" data-i18n="splash.eyebrow">Personal Homepage · 个人主页</div>
+    <h1 data-i18n="splash.h1.html">欢迎来到<br><em>孔德世</em>的主页</h1>
+    <p class="tagline" data-i18n="splash.tag1.html">特聘助理教授<br>上智大学</p>
+    <p class="tagline one-line" data-i18n="splash.tag2">研究低碳、新能源与轨道交通电气。</p>
+  </div>
+  <div class="scroll-cue">
+    <span data-i18n="splash.scroll">Scroll · 向下滚动</span>
+    <span class="line"></span>
+  </div>
+</section>
+
+<section class="hero" hidden style="display:none">
+</section>
+
+<div class="marquee" aria-hidden="true">
+  <div class="track">
+    <span data-i18n="marquee.1">好运常伴我身</span> <span class="sep">·</span>
+    <span data-i18n="marquee.2">船到桥头自然直</span> <span class="sep">·</span>
+    <span data-i18n="marquee.3">好好生活，好好学习</span> <span class="sep">·</span>
+    <span data-i18n="marquee.1">好运常伴我身</span> <span class="sep">·</span>
+    <span data-i18n="marquee.2">船到桥头自然直</span> <span class="sep">·</span>
+    <span data-i18n="marquee.3">好好生活，好好学习</span> <span class="sep">·</span>
+  </div>
+</div>
+
+<section class="section rail-layout about" id="about">
+  <aside class="rail">
+    <span class="num">§1</span>
+    <span class="label" data-i18n="about.rail">关于</span>
+  </aside>
+  <div>
+    <div class="eyebrow" data-i18n="about.eyebrow">简介</div>
+    <p data-i18n="about.p1">你好，我是孔德世，目前在东京上智大学宫武担任特聘助理教授。我的研究方向是电力电子、最优化与公共交通的交叉领域：设计能源管理策略，让城市轨道交通回收再生制动能量，将其储存在车载或地面储能装置中，并在站间进行再分配。</p>
+    <p data-i18n="about.p2"></p>
+    <p class="jp" data-i18n="about.jp">我会以下几种语言，欢迎与我交流！</p>
+    <div class="about-langs">
+      <div>
+        <div class="lg"><span data-i18n="about.langs.cn">中文</span><span class="lv" data-i18n="about.langs.cn.lv"></span></div>
+        <div class="sub" data-i18n="about.langs.cn.sub"></div>
+      </div>
+      <div>
+        <div class="lg"><span data-i18n="about.langs.en">英语</span><span class="lv" data-i18n="about.langs.en.lv"></span></div>
+        <div class="sub" data-i18n="about.langs.en.sub"></div>
+      </div>
+      <div>
+        <div class="lg"><span data-i18n="about.langs.ja">日本語</span><span class="lv" data-i18n="about.langs.ja.lv"></span></div>
+        <div class="sub" data-i18n="about.langs.ja.sub"></div>
+      </div>
+      <div>
+        <div class="lg"><span data-i18n="about.langs.dialect">山东话</span></div>
+        <div class="sub" data-i18n="about.langs.dialect.sub">家乡方言</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section rail-layout">
+  <aside class="rail">
+    <span class="num">§2</span>
+    <span class="label" data-i18n="princ.rail">座右铭</span>
+  </aside>
+  <div>
+    <div class="eyebrow" data-i18n="princ.eyebrow">我相信的三件事</div>
+    <h2 class="section-title" data-i18n="princ.title">座右铭、性格，和一个目标。</h2>
+    <div class="principles">
+      <article class="principle">
+        <span class="idx" data-i18n="princ.1.idx">01 · 座右铭</span>
+        <h3 data-i18n="princ.1.h" style="width: 190.586px">好运常伴我身。</h3>
+        <div class="en-sub" data-i18n="princ.1.en">Good luck is always with me.</div>
+        <p data-i18n="princ.1.p"></p>
+      </article>
+      <article class="principle">
+        <span class="idx" data-i18n="princ.2.idx">02 · 性格</span>
+        <h3 data-i18n="princ.2.h" style="width: 210.578px">船到桥头自然直。</h3>
+        <div class="en-sub" data-i18n="princ.2.en">Cross the bridge when you come to it.</div>
+        <p data-i18n="princ.2.p"></p>
+      </article>
+      <article class="principle">
+        <span class="idx" data-i18n="princ.3.idx">03 · 目标</span>
+        <h3 data-i18n="princ.3.h" style="width: 260.07px">好好生活，好好学习。</h3>
+        <div class="en-sub" data-i18n="princ.3.en">Live well, study well.</div>
+        <p data-i18n="princ.3.p"></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="lab-block">
+    <div class="side">
+      <div class="eyebrow">§3 · <span data-i18n="lab.eyebrow">同事</span></div>
+      <h2 data-i18n="lab.h">宫武研究室的同事们。</h2>
+      <p data-i18n="lab.p">宫武研究室隶属于上智大学理工学研究科，研究电气化铁道的节能运行。</p>
+      <a class="lab-link" href="https://www.researchgate.net/profile/Deshi-Kong-2" target="_blank" rel="noopener" data-i18n="lab.link">在 ResearchGate 查看我 →</a>
+    </div>
+    <div>
+      <div class="colleagues">
+        <div class="colleague"><img src="assets/tx1.jpg" alt=""><span class="tag">01</span></div>
+        <div class="colleague"><img src="assets/tx2.jpg" alt=""><span class="tag">02</span></div>
+        <div class="colleague"><img src="assets/tx3.jpg" alt=""><span class="tag">03</span></div>
+        <div class="colleague"><img src="assets/tx4.jpg" alt=""><span class="tag">04</span></div>
+        <div class="colleague"><img src="assets/tx5.jpg" alt=""><span class="tag">05</span></div>
+        <div class="colleague"><img src="assets/tx6.jpg" alt=""><span class="tag">06</span></div>
+        <div class="colleague"><img src="assets/tx7.jpg" alt=""><span class="tag">07</span></div>
+        <div class="colleague"><img src="assets/tx8.jpg" alt=""><span class="tag">08</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;display:none;">
+  <div class="cta"></div>
+</section>
+
+<footer class="foot">
+  <span data-i18n="foot.copy">© 2026 孔德世 · Deshi Kong</span>
+  <span class="center" data-i18n="foot.center">KONG's HOME · v2.0</span>
+  <span class="right" data-i18n="foot.right.profile">于东京</span>
+</footer>
+
+<script src="assets/app.js?v=15"></script>
+<script>
+  // Toggle .at-splash on body based on scroll position
+  (function() {
+    const body = document.body;
+    const splash = document.querySelector('.splash');
+    if (!splash) return;
+    let ticking = false;
+    function update() {
+      const threshold = splash.offsetHeight - 80;
+      if (window.scrollY < threshold) body.classList.add('at-splash');
+      else body.classList.remove('at-splash');
+      ticking = false;
+    }
+    window.addEventListener('scroll', () => {
+      if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+    update();
+  })();
+</script>
+</body>
+</html>

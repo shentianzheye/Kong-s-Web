@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="assets/i18n.js?v=15"></script>
+<style>html:not(.i18n-ready) [data-i18n]{visibility:hidden}</style>
+<title data-i18n="meta.title">KONG · 研究</title>
+<link rel="shortcut icon" href="assets/favicon.ico">
+<link rel="stylesheet" href="assets/style.css?v=12">
+<style>
+  .rx-head { padding: calc(72px + 4rem) var(--edge) 0; max-width: 1440px; margin: 0 auto; }
+  .rx-head .eyebrow { margin-bottom: 3rem; }
+  .rx-head h1 { font-family: var(--display); font-weight: 400; font-size: clamp(3rem, 7vw, 6rem); line-height: 1.05; letter-spacing: -0.025em; max-width: 18ch; white-space: pre-line; }
+  .rx-head .cn { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-top: 2rem; }
+  .rx-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; padding: 4rem 0 2rem; border-bottom: 1px solid var(--rule); margin-top: 4rem; }
+  .rx-stats .st { font-family: var(--display); font-weight: 300; font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1; color: var(--accent-ink); letter-spacing: -0.02em; }
+  .rx-stats .sb { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-top: 10px; }
+  .rx-body { max-width: 1440px; margin: 0 auto; padding: 2rem var(--edge) 4rem; display: grid; grid-template-columns: var(--rail) 1fr; gap: clamp(2rem, 5vw, 5rem); }
+  .rx-toc { position: sticky; top: 110px; align-self: start; font-family: var(--mono); font-size: 11px; }
+  .rx-toc h4 { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; margin-bottom: 1rem; }
+  .rx-toc ol { list-style: none; counter-reset: toc; display: flex; flex-direction: column; gap: 2px; }
+  .rx-toc ol li { counter-increment: toc; }
+  .rx-toc ol a { display: flex; gap: 10px; padding: 7px 0; color: var(--ink-2); border-top: 1px solid var(--rule); transition: color 160ms, padding 160ms; }
+  .rx-toc ol a:hover { color: var(--ink); padding-left: 6px; }
+  .rx-toc ol a::before { content: counter(toc, decimal-leading-zero); color: var(--ink-3); }
+  .rx-toc ol a.active { color: var(--accent-ink); }
+  .rx-main section { padding-bottom: 5rem; scroll-margin-top: 100px; }
+  .rx-main section + section { padding-top: 5rem; border-top: 1px solid var(--rule); }
+  .rx-main h2 { font-family: var(--display); font-weight: 400; font-size: clamp(2rem, 3.5vw, 2.75rem); line-height: 1.15; letter-spacing: -0.015em; margin-bottom: 2rem; }
+  .rx-main h2 .idx { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: 0.14em; color: var(--accent-ink); display: inline-block; margin-right: 1rem; vertical-align: middle; }
+  .rx-main h2 .sub { display: block; font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-top: 8px; }
+  .rx-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .rx-intro > div { padding: 1.5rem 1.5rem 1.5rem 0; border-bottom: 1px solid var(--rule); }
+  .rx-intro > div:nth-child(2n) { padding-left: 1.5rem; border-left: 1px solid var(--rule); padding-right: 0; }
+  .rx-intro > div:nth-last-child(-n+2) { border-bottom: none; }
+  .rx-intro dt { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  .rx-intro dd { font-family: var(--display); font-size: 22px; font-weight: 400; color: var(--ink); line-height: 1.2; }
+  .rx-intro .s { font-family: var(--sans); font-size: 13px; color: var(--ink-2); margin-top: 4px; font-weight: 400; }
+  .edu { display: flex; flex-direction: column; }
+  .edu-row { display: grid; grid-template-columns: 10rem 1fr auto; gap: 1.5rem; padding: 1.5rem 0; border-top: 1px solid var(--rule); align-items: baseline; }
+  .edu-row:last-child { border-bottom: 1px solid var(--rule); }
+  .edu-row .yr { font-family: var(--mono); font-size: 13px; color: var(--ink-3); letter-spacing: 0.05em; }
+  .edu-row .deg { font-family: var(--display); font-size: 20px; font-weight: 400; line-height: 1.25; }
+  .edu-row .school { font-family: var(--sans); font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+  .edu-row .school a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--rule); transition: color 0.18s, border-color 0.18s; }
+  .edu-row .school a:hover { color: var(--accent-ink); border-bottom-color: var(--accent-ink); }
+  .edu-row .city { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.1em; text-align: right; max-width: 18ch; }
+  .skill-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 2rem 0 1rem; }
+  .skill-title:first-child { margin-top: 0; }
+  .lang-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .lang-grid .l { font-family: var(--mono); font-size: 12px; padding: 14px 16px; border: 1px solid var(--rule); color: var(--ink-2); background: var(--paper-2); letter-spacing: 0.02em; }
+  .lang-tbl { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+  .lang-tbl td, .lang-tbl th { padding: 10px 12px 10px 0; text-align: left; border-bottom: 1px solid var(--rule); }
+  .lang-tbl th { font-weight: 500; color: var(--ink-2); font-size: 12px; letter-spacing: 0.02em; }
+  .lang-tbl td.sc { color: var(--accent-ink); font-weight: 500; text-align: right; padding-right: 0; }
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag-grid span { font-family: var(--mono); font-size: 12px; padding: 6px 12px; border: 1px solid var(--rule); color: var(--ink-2); }
+  .tag-grid span.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .skill-note { font-size: 14px; color: var(--ink-2); line-height: 1.65; margin-top: 1.25rem; max-width: none; white-space: nowrap; overflow-x: auto; }
+  .pub-group { margin-bottom: 2.5rem; }
+  .pub-group h3 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--rule); }
+  .pub { display: grid; grid-template-columns: 4.5rem 1fr auto; gap: 1.25rem; padding: 1rem 0; border-bottom: 1px solid var(--rule-2); }
+  .pub .yr { font-family: var(--mono); font-size: 12px; color: var(--ink-3); padding-top: 4px; letter-spacing: 0.06em; }
+  .pub .title { font-size: 14.5px; line-height: 1.55; color: var(--ink); font-weight: 500; }
+  .pub .authors { font-family: var(--mono); font-size: 11px; color: var(--ink-2); margin-bottom: 4px; letter-spacing: 0.02em; }
+  .pub .venue { font-style: italic; color: var(--ink-2); font-family: var(--display); font-size: 13.5px; display: block; margin-top: 4px; }
+  .pub .me { color: var(--accent-ink); }
+  .pub .tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); padding-top: 6px; white-space: nowrap; }
+  .teach { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .teach-h { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; margin: 0 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--rule); }
+  .teach-h:not(:first-of-type) { margin-top: 2.5rem; }
+  .course-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem 1.5rem; margin-bottom: 1rem; }
+  .course { display: grid; grid-template-columns: 100px 1fr; gap: 1rem; padding: 0.85rem 0; border-bottom: 1px dashed var(--rule); align-items: baseline; }
+  .course .yr { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .course .name { font-size: 14px; color: var(--ink); }
+  .teach .card { padding: 2rem; border: 1px solid var(--rule); background: var(--paper-2); }
+  .teach .card .role { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 1rem; }
+  .teach .card h3 { font-family: var(--display); font-weight: 400; font-size: 22px; margin-bottom: 4px; }
+  .teach .card .span { font-family: var(--mono); font-size: 12px; color: var(--ink-3); margin-bottom: 1rem; }
+  .teach .card p { font-size: 14px; color: var(--ink-2); line-height: 1.65; }
+  .aw-list { display: grid; grid-template-columns: repeat(2, 1fr); column-gap: 3rem; row-gap: 0; }
+  .aw { display: grid; grid-template-columns: 5rem 1fr; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--rule-2); align-items: baseline; }
+  .aw .yr { font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; }
+  .aw .name { font-size: 14px; color: var(--ink); line-height: 1.45; }
+  .practice { display: grid; grid-template-columns: 1fr; gap: 0; }
+  .practice h3 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; margin: 1.75rem 0 0.75rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--rule); }
+  .practice h3:first-child { margin-top: 0; }
+  .p-row { display: grid; grid-template-columns: 5rem 1fr; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid var(--rule-2); align-items: baseline; }
+  .p-row .yr { font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; }
+  .p-row .desc { font-size: 14px; color: var(--ink); line-height: 1.5; }
+  @media (max-width: 960px) {
+    .rx-body { grid-template-columns: 1fr; }
+    .rx-toc { position: static; margin-bottom: 2rem; }
+    .rx-intro { grid-template-columns: 1fr; }
+    .rx-intro > div, .rx-intro > div:nth-child(2n) { padding: 1.25rem 0; border-left: none; }
+    .edu-row { grid-template-columns: 6rem 1fr; }
+    .edu-row .city { grid-column: 2; text-align: left; margin-top: 4px; }
+    .teach, .aw-list { grid-template-columns: 1fr; }
+    .rx-stats { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  }
+</style>
+</head>
+<body data-screen-label="03 Research">
+
+<header class="chrome">
+  <div class="chrome-inner">
+    <a class="wordmark" href="index.html"><span class="mark"></span><span class="name" data-i18n="wordmark.name">孔德世</span></a>
+    <nav class="nav">
+      <a href="index.html" data-i18n="nav.profile">主页</a>
+      <a href="research.html" data-i18n="nav.research">研究</a>
+      <a href="database.html" data-i18n="nav.database">知识库</a>
+      <a href="links.html" data-i18n="nav.links">链接</a>
+      <a href="life.html" data-i18n="nav.life">生活</a>
+    </nav>
+    <div class="meta">
+      <span><span class="dot"></span><span data-i18n="meta.phd">博士在读 · 2022—至今</span></span>
+      <span data-langswitch></span>
+    </div>
+  </div>
+</header>
+
+<section class="rx-head">
+  <div class="eyebrow" data-i18n="rx.head.eyebrow">研究经历</div>
+  <h1 data-i18n="rx.head.h">十一年的<br>学习与思考。</h1>
+  <div class="cn" data-i18n="rx.head.cn">高中 · 本科 · 硕士 · 博士</div>
+
+  <div class="rx-stats">
+    <div>
+      <div class="st">8</div>
+      <div class="sb" data-i18n="rx.stats.pub">发表论文</div>
+    </div>
+    <div>
+      <div class="st">8</div>
+      <div class="sb" data-i18n="rx.stats.schol">奖学金</div>
+    </div>
+    <div>
+      <div class="st">4</div>
+      <div class="sb" data-i18n="rx.stats.lang">掌握语言</div>
+    </div>
+  </div>
+</section>
+
+<div class="rx-body">
+  <aside class="rx-toc">
+    <h4 data-i18n="rx.toc.title">本页目录</h4>
+    <ol>
+      <li><a href="#s1" data-i18n="rx.s1.title">基本信息</a></li>
+      <li><a href="#s2" data-i18n="rx.s2.title">求学经历</a></li>
+      <li><a href="#s2b" data-i18n="rx.career.title">职业经历</a></li>
+      <li><a href="#s3" data-i18n="rx.s3.title">技能与语言</a></li>
+      <li><a href="#s4" data-i18n="rx.s4.title">论文与专利</a></li>
+      <li><a href="#s5" data-i18n="rx.s5.title">教学与研究助理</a></li>
+      <li><a href="#s6" data-i18n="rx.s6.title">奖项与奖学金</a></li>
+      <li><a href="#s7" data-i18n="rx.s7.title">实习与社会实践</a></li>
+    </ol>
+  </aside>
+
+  <div class="rx-main">
+    <section id="s1">
+      <h2><span class="idx">§1</span><span data-i18n="rx.s1.title">基本信息</span><span class="sub" data-i18n="rx.s1.cn">自我介绍</span></h2>
+      <dl class="rx-intro">
+        <div><dt data-i18n="rx.intro.name">姓名</dt><dd><span data-i18n="rx.intro.name.v">孔德世</span><div class="s" data-i18n="rx.intro.name.s">Deshi Kong</div></dd></div>
+        <div><dt data-i18n="rx.intro.born">出生</dt><dd><span data-i18n="rx.intro.born.v">1997</span><div class="s" data-i18n="rx.intro.born.s">山东济南 · 中华人民共和国</div></dd></div>
+        <div><dt data-i18n="rx.intro.field">领域</dt><dd><span data-i18n="rx.intro.field.v">电气工程</span><div class="s" data-i18n="rx.intro.field.s">轨道交通电气 · 储能 · 最优化</div></dd></div>
+        <div><dt data-i18n="rx.intro.affil">单位</dt><dd><span data-i18n="rx.intro.affil.v">上智大学</span><div class="s" data-i18n="rx.intro.affil.s">宫武研究室 · 理工学研究科</div></dd></div>
+        <div><dt data-i18n="rx.intro.status">状态</dt><dd><span data-i18n="rx.intro.status.v">特聘助理教授</span><div class="s" data-i18n="rx.intro.status.s">2027 年4 月结束</div></dd></div>
+        <div><dt>ResearchGate</dt><dd><a href="https://www.researchgate.net/profile/Deshi-Kong-2" target="_blank" style="font-size:20px;border-bottom:1px solid var(--rule);">Deshi-Kong-2 ↗</a><div class="s">researchgate.net</div></dd></div>
+      </dl>
+    </section>
+
+    <section id="s2">
+      <h2><span class="idx">§2</span><span data-i18n="rx.s2.title">求学经历</span><span class="sub" data-i18n="rx.s2.cn">学历</span></h2>
+      <div class="edu">
+        <div class="edu-row">
+          <span class="yr">2012 — 2015</span>
+          <div>
+            <div class="deg" data-i18n="rx.edu.1.deg">高中</div>
+            <div class="school"><a href="https://www.fuzhong.sdnu.edu.cn/" target="_blank" data-i18n="rx.edu.1.school">山东师范大学附属中学</a></div>
+          </div>
+          <span class="city" data-i18n="rx.edu.1.d">济南</span>
+        </div>
+        <div class="edu-row">
+          <span class="yr">2015 — 2019</span>
+          <div>
+            <div class="deg" data-i18n="rx.edu.2.deg">学士 — 电气工程及其自动化</div>
+            <div class="school"><a href="https://ls.shmtu.edu.cn/" target="_blank" data-i18n="rx.edu.2.school">上海海事大学 · 物流工程学院</a></div>
+          </div>
+          <span class="city" data-i18n="rx.edu.2.d">上海</span>
+        </div>
+        <div class="edu-row">
+          <span class="yr">2019 — 2021</span>
+          <div>
+            <div class="deg" data-i18n="rx.edu.3.deg">硕士 — 绿色科学与工程</div>
+            <div class="school"><a href="https://miyatake.main.jp/member.php" target="_blank" data-i18n="rx.edu.3.school">上智大学 · 绿色科学与工程系 · 宫武研究室</a></div>
+          </div>
+          <span class="city" data-i18n="rx.edu.3.d">日本 · 东京</span>
+        </div>
+        <div class="edu-row">
+          <span class="yr">2021 — 2024</span>
+          <div>
+            <div class="deg" data-i18n="rx.edu.4.deg">博士 — 绿色科学与工程</div>
+            <div class="school"><a href="https://miyatake.main.jp/member.php" target="_blank" data-i18n="rx.edu.4.school">上智大学 · 绿色科学与工程系 · 宫武研究室</a></div>
+          </div>
+          <span class="city" data-i18n="rx.edu.4.d">日本 · 东京</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="s2b">
+      <h2><span class="idx">§2.5</span><span data-i18n="rx.career.title">职业经历</span><span class="sub" data-i18n="rx.career.cn">研究履历</span></h2>
+      <div class="edu">
+        <div class="edu-row">
+          <span class="yr" data-i18n="rx.career.1.span">2024.04 — 至今</span>
+          <div>
+            <div class="deg" data-i18n="rx.career.1.deg">特聘助理教授</div>
+            <div class="school"><a href="https://fst.sophia.ac.jp/en/faculty/deshi-kong" target="_blank" data-i18n="rx.career.1.school">上智大学 · 理工学部 机能创造理工学科</a></div>
+          </div>
+          <span class="city" data-i18n="rx.career.1.d">日本 · 东京</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2><span class="idx">§3</span><span data-i18n="rx.s3.title">技能与语言</span><span class="sub" data-i18n="rx.s3.cn">技能</span></h2>
+
+      <div class="skill-title" data-i18n="rx.skills.lang">语言</div>
+      <div class="lang-grid">
+        <div class="l" data-i18n="rx.lang.psc">普通话水平测试 (PSC)</div>
+        <div class="l" data-i18n="rx.lang.ielts">英语雅思 (IELTS)</div>
+        <div class="l" data-i18n="rx.lang.toeic">英语托业 (TOEIC)</div>
+        <div class="l" data-i18n="rx.lang.cet6">大学英语六级 (CET-6)</div>
+        <div class="l" data-i18n="rx.lang.jlptn1">日语能力测试 (JLPT N1)</div>
+        <div class="l" data-i18n="rx.lang.jlptn2">日语能力测试 (JLPT N2)</div>
+      </div>
+
+      <div class="skill-title" data-i18n="rx.skills.sw">软件与编程</div>
+      <div class="tag-grid">
+        <span class="primary">MATLAB / Simulink</span>
+        <span class="primary">Python</span>
+        <span>LaTeX</span>
+        <span>Arduino</span>
+        <span>Raspberry Pi</span>
+        <span>C</span>
+        <span>Assembly</span>
+        <span>HTML / CSS</span>
+        <span>Word / Excel / PowerPoint</span>
+      </div>
+      <p class="skill-note" data-i18n="rx.skills.primary">主要工具 — MATLAB/Simulink 电力系统仿真；Python 做优化（GA、NSGA-II、MILP）；Arduino 与树莓派用于硬件原型。</p>
+    </section>
+
+    <section id="s4">
+      <h2><span class="idx">§4</span><span data-i18n="rx.s4.title">论文与专利</span><span class="sub" data-i18n="rx.s4.cn">学术成就</span></h2>
+
+      <div class="pub-group">
+        <h3 data-i18n="rx.pub.journal">期刊论文</h3>
+        <article class="pub">
+          <span class="yr">2026.01</span>
+          <div>
+            <div class="authors">Deming Kong, Lei Li, <span class="me">Deshi Kong</span>, Shujie Sun, Xuepeng Qian</div>
+            <div class="title">Policy Synergy Scenarios for Tokyo's Passenger Transport and Urban Freight: An Integrated Multi-Model LEAP Assessment</div>
+            <span class="venue">Energies · 2026/01/12</span>
+          </div>
+          <span class="tag">MDPI</span>
+        </article>
+        <article class="pub">
+          <span class="yr">2024.03</span>
+          <div>
+            <div class="authors"><span class="me">Deshi Kong</span>, Masafumi Miyatake</div>
+            <div class="title">Cooperative Application of Onboard Energy Storage and Stationary Energy Storage in Rail Transit Based on Genetic Algorithm</div>
+            <span class="venue">Energies, 17(6): 1426</span>
+          </div>
+          <span class="tag">MDPI</span>
+        </article>
+      </div>
+
+      <div class="pub-group">
+        <h3 data-i18n="rx.pub.conf">会议论文</h3>
+        <article class="pub">
+          <span class="yr">2025.01</span>
+          <div>
+            <div class="authors">Yaopeng Zhang, Joao Victor Pinon, Pereira Dias, <span class="me">Deshi Kong</span>, Masafumi Miyatake</div>
+            <div class="title">Optimization of energy management and capacity sizing for railway stations integrating renewable energy sources and regenerative braking energy</div>
+            <span class="venue">2025/01</span>
+          </div>
+          <span class="tag">Conf.</span>
+        </article>
+        <article class="pub">
+          <span class="yr">2025.07</span>
+          <div>
+            <div class="authors">Deming Kong, Lei Li, <span class="me">Deshi Kong</span>, Xuepeng Qian</div>
+            <div class="title">Evaluating hydrogen public transport's role in Tokyo's carbon neutrality: A LEAP and multi-model approach</div>
+            <span class="venue">Applied Energy Symposium: Low-Carbon Cities & Urban Energy Systems (CUE2025)</span>
+          </div>
+          <span class="tag">CUE2025</span>
+        </article>
+        <article class="pub">
+          <span class="yr">2023.11</span>
+          <div>
+            <div class="authors"><span class="me">Deshi Kong</span>, Mingyu Lyu, Masafumi Miyatake</div>
+            <div class="title">Cooperative optimization of capacity and energy management of hybrid energy storage system in rail transit system based on NSGA-II and mixed-integer linear programming</div>
+            <span class="venue">ICEMS 2023 · 26th International Conference on Electrical Machines and Systems, IEEE</span>
+          </div>
+          <span class="tag">IEEE</span>
+        </article>
+        <article class="pub">
+          <span class="yr">2022.12</span>
+          <div>
+            <div class="authors"><span class="me">Deshi Kong</span>, Masafumi Miyatake</div>
+            <div class="title">Energy and Capacity Management of Hybrid Energy Storage System Applied to Urban Rail Transit by Nondominated Sorting Genetic Algorithm-II</div>
+            <span class="venue">ICEMS 2022 · 25th International Conference on Electrical Machines and Systems, IEEE</span>
+          </div>
+          <span class="tag">IEEE</span>
+        </article>
+        <article class="pub">
+          <span class="yr">2022.12</span>
+          <div>
+            <div class="authors">Mingyu Lyu, <span class="me">Deshi Kong</span>, Masafumi Miyatake</div>
+            <div class="title">Optimal Energy Dispatch of Energy Storage System as a Shared Infrastructure between DC Railway Network and DC Micro Grid</div>
+            <span class="venue">ICEMS 2022 · 25th International Conference on Electrical Machines and Systems, IEEE</span>
+          </div>
+          <span class="tag">IEEE</span>
+        </article>
+        <article class="pub">
+          <span class="yr">2020.12</span>
+          <div>
+            <div class="authors"><span class="me">Deshi Kong</span>, Masafumi Miyatake</div>
+            <div class="title">Energy management of superconducting magnetic energy storage applied to urban rail transit for regenerative energy recovery</div>
+            <span class="venue">ICEMS 2020 · 23rd International Conference on Electrical Machines and Systems, IEEE</span>
+          </div>
+          <span class="tag">IEEE</span>
+        </article>
+      </div>
+
+      <div class="pub-group">
+        <h3 data-i18n="rx.pub.patent">专利</h3>
+        <article class="pub">
+          <span class="yr">—</span>
+          <div>
+            <div class="authors" data-i18n="rx.patent.inv">第二发明人 · Co-inventor</div>
+            <div class="title" data-i18n="rx.patent.title">基于浮力称重传感原理的可变速给料的定量称量系统</div>
+            <span class="venue">A quantitative weighing system for variable-speed feeding based on buoyant weighing-sensing</span>
+          </div>
+          <span class="tag">Patent · CN</span>
+        </article>
+      </div>
+
+      <div class="pub-group">
+        <h3 data-i18n="rx.pub.comp">竞赛</h3>
+        <article class="pub">
+          <span class="yr">2018.10</span>
+          <div>
+            <div class="title"><a href="https://kongdeshi.notion.site/6f8778a5fec14737afad7034354ab6d4" target="_blank">Wireless Charging Intelligent Vehicle — 2nd Prize, Shanghai Student Electronic Design Competition (TI)</a></div>
+            <span class="venue" data-i18n="rx.comp.1.v">上海市大学生电子设计竞赛 · 二等奖</span>
+          </div>
+          <span class="tag">SH · 2nd</span>
+        </article>
+        <article class="pub">
+          <span class="yr">2018.01</span>
+          <div>
+            <div class="title"><a href="https://kongdeshi.notion.site/892327c995054163a2d0c38375d39802" target="_blank">National Intelligent Vehicle Competition — 3rd Prize (school level)</a></div>
+            <span class="venue" data-i18n="rx.comp.2.v">全国大学生智能车竞赛 · 校级三等奖</span>
+          </div>
+          <span class="tag">Nat. · 3rd</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2><span class="idx">§5</span><span data-i18n="rx.s5.title">教学与研究助理</span><span class="sub" data-i18n="rx.s5.cn">教学经历</span></h2>
+
+      <h3 class="teach-h" data-i18n="rx.teach.current">当前教授课程 · 上智大学</h3>
+      <div class="course-grid">
+        <div class="course"><span class="yr">2025.09—</span><span class="name" data-i18n="rx.course.1">基础科学实验·演习</span></div>
+        <div class="course"><span class="yr">2025.09—</span><span class="name" data-i18n="rx.course.2">先端电气电子工学 1</span></div>
+        <div class="course"><span class="yr">2025.04—</span><span class="name" data-i18n="rx.course.3">绿色工学特论 3</span></div>
+        <div class="course"><span class="yr">2025.04—</span><span class="name" data-i18n="rx.course.4">工学应用科学 3</span></div>
+        <div class="course"><span class="yr">2024.09—</span><span class="name" data-i18n="rx.course.5">绿色工学实验 3</span></div>
+        <div class="course"><span class="yr">2024.09—</span><span class="name" data-i18n="rx.course.6">系统解析基础</span></div>
+      </div>
+
+      <h3 class="teach-h" data-i18n="rx.teach.past">助教 · 研究助理经历</h3>
+      <div class="teach">
+        <div class="card">
+          <div class="role" data-i18n="rx.teach.ta.role">助教 · TA</div>
+          <h3 data-i18n="rx.teach.ta.h">Arduino 微控制器实验</h3>
+          <div class="span" data-i18n="rx.teach.ta.span">2019 — 2021 · 上智大学</div>
+          <p data-i18n="rx.teach.ta.p">指导本科生理解硬件电路与软件编程的结合……</p>
+        </div>
+        <div class="card">
+          <div class="role" data-i18n="rx.teach.ra.role">研究助理 · RA</div>
+          <h3 data-i18n="rx.teach.ra.h">宫武研究室</h3>
+          <div class="span" data-i18n="rx.teach.ra.span">2022 — 2024 · 上智大学</div>
+          <p data-i18n="rx.teach.ra.p">维护实验室的混合储能系统仿真管线……</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2><span class="idx">§6</span><span data-i18n="rx.s6.title">奖项与奖学金</span><span class="sub" data-i18n="rx.s6.cn">获奖经历</span></h2>
+      <div class="aw-list">
+        <div class="aw"><span class="yr">2015</span><span class="name" data-i18n="rx.aw.1">上海海事大学招商轮船企业级特等奖</span></div>
+        <div class="aw"><span class="yr">2016</span><span class="name" data-i18n="rx.aw.2">上海海事大学校级专业一等奖学金</span></div>
+        <div class="aw"><span class="yr">2016</span><span class="name" data-i18n="rx.aw.3">上海海事大学校级优秀学生荣誉</span></div>
+        <div class="aw"><span class="yr">2017</span><span class="name" data-i18n="rx.aw.4">上海海事大学校级专业三等奖学金</span></div>
+        <div class="aw"><span class="yr">2017</span><span class="name" data-i18n="rx.aw.5">上海海事大学校级三好学生荣誉</span></div>
+        <div class="aw"><span class="yr">2021</span><span class="name" data-i18n="rx.aw.6">上智大学 修学奖励奖学金</span></div>
+        <div class="aw"><span class="yr">2022</span><span class="name" data-i18n="rx.aw.7">上智大学 新生奖学金</span></div>
+        <div class="aw"><span class="yr">2022</span><span class="name" data-i18n="rx.aw.8">上智大学 修学奖励奖学金</span></div>
+        <div class="aw"><span class="yr">2022</span><span class="name" data-i18n="rx.aw.9">上智大学 外国人留学生生活支援奖学金</span></div>
+        <div class="aw"><span class="yr">2022</span><span class="name" data-i18n="rx.aw.10">上智大学 大学院博士后期课程研究者育成奖学金</span></div>
+        <div class="aw"><span class="yr">2023</span><span class="name" data-i18n="rx.aw.11">上智大学 修学奖励奖学金</span></div>
+        <div class="aw"><span class="yr">2023</span><span class="name" data-i18n="rx.aw.12">上智大学 外国人留学生生活支援奖学金</span></div>
+        <div class="aw"><span class="yr">2023</span><span class="name" data-i18n="rx.aw.13">上智大学 大学院博士后期课程研究者育成奖学金</span></div>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2><span class="idx">§7</span><span data-i18n="rx.s7.title">实习与社会实践</span><span class="sub" data-i18n="rx.s7.cn">社会实践</span></h2>
+      <div class="practice">
+        <h3 data-i18n="rx.practice.intern">实习</h3>
+        <div class="p-row"><span class="yr">2019.08</span><span class="desc" data-i18n="rx.intern.1">济南积成电子有限公司 — 电量研发事业部</span></div>
+        <div class="p-row"><span class="yr">2017.08</span><span class="desc" data-i18n="rx.intern.2">济南瑞泉电子公司 — 研发部软件开发</span></div>
+
+        <h3 data-i18n="rx.practice.org">学生组织</h3>
+        <div class="p-row"><span class="yr">2015 — 2017</span><span class="desc" data-i18n="rx.org.1">上海海事大学仪仗队 · 队员</span></div>
+        <div class="p-row"><span class="yr">2015 — 2016</span><span class="desc" data-i18n="rx.org.2">上海海事大学大学生职业发展协会 · 宣传部部长助手</span></div>
+        <div class="p-row"><span class="yr">2012 — 2014</span><span class="desc" data-i18n="rx.org.3">山东师范大学附属中学英语协会 · 宣传委员</span></div>
+
+        <h3 data-i18n="rx.practice.comm">志愿活动</h3>
+        <div class="p-row"><span class="yr">2017.06</span><span class="desc" data-i18n="rx.vol.1">上海爱心支教志愿者</span></div>
+        <div class="p-row"><span class="yr">2017.05</span><span class="desc" data-i18n="rx.vol.2">上海第六人民医院志愿者</span></div>
+        <div class="p-row"><span class="yr">2016.04</span><span class="desc" data-i18n="rx.vol.3">上海东海清滩活动志愿者</span></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<footer class="foot">
+  <span data-i18n="foot.copy">© 2026 孔德世</span>
+  <span class="center" data-i18n="foot.cv">CV 更新于 2026.04 · v2.0</span>
+  <a class="right" href="index.html" data-i18n="foot.right.back">← 返回首页</a>
+</footer>
+
+<script src="assets/app.js?v=15"></script>
+<script>
+  // TOC highlight
+  const sections = document.querySelectorAll('.rx-main section');
+  const tocLinks = document.querySelectorAll('.rx-toc a');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>
